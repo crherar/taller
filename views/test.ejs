@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+    <p> <% resultados[0].direccionIP %> </p>
+
+        <table id=myTable class="table table-striped">
+                <tr>
+                   <th>Dirección IP</th><th>Socket ID</th>
+                </tr>
+                <% for (var i = 0; i < resultados.length; i++) { %>
+                 <tr>
+                   <td><%= resultados[i].direccionIP %></td>
+                   <td><%= resultados[i].socketID%></td>
+                 </tr>    
+                <% } %>
+             </table>
+
+    <button type="button" class="btn btn-primary">Decir hola</button>
+    <input id="myInput" type="text" placeholder="Search..">
+
+  </body>
+
+
+    
+
+
+</html>
+
+
+<script>
+$('button').on('click', function() {
+    $.ajax({
+      type: 'POST',
+      url: '/send',
+      //data: JSON.stringify({ saludo: 'hola hola hola' }),
+      data: {direccionIP:'192.168.100.43', saludo:'hola cliente'},
+      success: function(resultData) {
+         alert(resultData);
+      }
+    });
+});
+
+$(document).ready(function() {
+var item= $("table tbody tr td:nth-child(1)");
+//var item= $("table tbody tr td:nth-child(2)");
+alert(item.text());
+});
+
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+</script>
