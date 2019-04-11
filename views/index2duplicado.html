@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+
+    <table id="clientes" class="table table-striped">
+            <thead>
+                <tr>
+                <th>IP Address</th>
+                <th>Lastname</th>
+                <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <td>John</td>
+                <td>Doe</td>
+                <td>john@example.com</td>
+                </tr>
+                <tr>
+                <td>Mary</td>
+                <td>Moe</td>
+                <td>mary@example.com</td>
+                </tr>
+                <tr>
+                <td>July</td>
+                <td>Dooley</td>
+                <td>july@example.com</td>
+                </tr>
+            </tbody>
+            </table>
+
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <!-- <script src="/socket.io/socket.io.js"></script>
+    <script>
+         var socket = io();
+    </script> -->
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <!-- <script>
+        $(function () {
+            var socket = io();
+            $('form').submit(function(e){
+            e.preventDefault(); // prevents page reloading
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+            return false;
+            });
+            socket.on('chat message', function(msg){
+                $('#messages').append($('<li>').text(msg));
+            });
+        });
+    </script> -->
+
+  </body>
+
+  <button type="button" class="btn btn-primary">Decir hola</button>
+
+    
+
+
+</html>
+
+
+<script>
+$('button').on('click', function() {
+    $.ajax({
+      type: 'POST',
+      url: '/send',
+      //data: JSON.stringify({ saludo: 'hola hola hola' }),
+      data: {direccionIP:'192.168.100.43', saludo:'hola cliente'},
+      success: function(resultData) {
+         alert(resultData);
+      }
+    });
+});
+</script>

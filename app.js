@@ -1,3 +1,4 @@
+var express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -7,6 +8,13 @@ var path = require('path');
 //const bodyParser = require('body-parser');
 //var urlencodedParser = bodyParser.urlencoded({ extended: true });
 app.set('view engine', 'ejs');
+
+app.use('/assets', express.static('assets'));
+
+  // console.log(req.url);
+  // next();
+
+
 app.use(bodyParser.json());
 
 var indexRoutes = require('./routes/index')(io);

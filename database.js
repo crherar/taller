@@ -38,10 +38,9 @@ exports.insertarClientes = function(datos, callback) {
 }
 
 
-
-
-
-
+var obtenerClientes = function() {
+    
+}
 /* el servidor que escucha los sockets clientes puede ir en app.js */
 
 /*

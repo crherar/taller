@@ -84,22 +84,22 @@ io.on('connection', function(socket){
   });
 
 
-router.get('/', urlencodedParser, function(req, res) {
+// router.get('/', urlencodedParser, function(req, res) {
 
 
-    con.query('SELECT * FROM clientes', function (error, results, fields) {
-      if (error) {
-        console.log("\n\nERROR:\n\n", error, "\n\n");
-        res.send({
-          mensaje: error.code
-        })
-      } else {
-        res.send({
-            data:results
-        })
-      }
-      });
-  });
+//     con.query('SELECT * FROM clientes', function (error, results, fields) {
+//       if (error) {
+//         console.log("\n\nERROR:\n\n", error, "\n\n");
+//         res.send({
+//           mensaje: error.code
+//         })
+//       } else {
+//         res.send({
+//             data:results
+//         })
+//       }
+//       });
+//   });
 
 // var mostrarClientes = function() {
 //     con.query('SELECT * FROM clientes', function (error, results, fields) {
@@ -115,7 +115,7 @@ router.get('/', urlencodedParser, function(req, res) {
 //     });
 // }
 
-  router.get('/test', function(req, res) {
+router.get('/clientes', function(req, res) {
 
     con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
         if (error) {
@@ -135,7 +135,7 @@ router.get('/', urlencodedParser, function(req, res) {
                     socketID: results[i].socketID
                 });
             }
-            res.render('test', {resultados:resultados});
+            res.render('clientes', {resultados:resultados});
         }
         });
   })
@@ -161,9 +161,18 @@ router.get('/', urlencodedParser, function(req, res) {
 
 //});
 
+// router.get('/', (req, res, next) => {
+//     res.sendFile(path.join(__dirname, '../', 'views', 'index.html'));
+// });
+
 router.get('/', (req, res, next) => {
-    res.sendFile(path.join(__dirname, '../', 'views', 'index.html'));
+    res.render(path.join(__dirname, '../', 'views', 'index'));
 });
+
+router.get('/importar', (req, res, next) => {
+    res.render(path.join(__dirname, '../', 'views', 'importar'));
+});
+
 router.post('/send', urlencodedParser, (req, res) => {
 
     // Parametros: regla, IP de equipo o masivo.
