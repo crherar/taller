@@ -3,13 +3,14 @@ module.exports = function(io) {
 const mysql = require('mysql');
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
 var bodyParser = require('body-parser');
-var db = require('../database');
-const router = express.Router();
+var async = require('async');
 
-var urlencodedParser = bodyParser.urlencoded({ extended: true });
+//var db = require('../database');
 
-var usuariosConectados = {}
+
+// Objeto de conexion BDD
 
 var con = mysql.createConnection({
     host: 'localhost',
@@ -19,6 +20,8 @@ var con = mysql.createConnection({
     socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
 });
 
+// Conexion a BDD
+
 con.connect(function(err) {
     if (err) {
       console.error('Error de conexion: ' + err.stack);
@@ -26,6 +29,113 @@ con.connect(function(err) {
     }
     console.log('Conectado con el ID: ' + con.threadId);
 });
+
+
+const router = express.Router();
+
+var urlencodedParser = bodyParser.urlencoded({ extended: true });
+
+const storage = multer.diskStorage({
+    destination: 'reglas',
+    filename: function(req, file, cb) {
+        cb(null, file.originalname); // + path.extname(file.originalname));
+    }
+});
+
+const upload =  multer({
+    storage: storage
+}).single('archivo');
+
+
+router.get('/', (req, res, next) => {
+    res.render(path.join(__dirname, '../', 'views', 'index'));
+});
+
+router.get('/importar', (req, res, next) => {
+    res.render(path.join(__dirname, '../', 'views', 'importar'));
+});
+
+router.get('/ejecutar-regla', (req, res, next) => {
+    //res.render(path.join(__dirname, '../', 'views', 'ejecutar-regla'));
+    async.series({
+        clientes: function(cb) {
+            con.query("SELECT direccionIP, socketID FROM clientes", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        reglas: function(cb){
+            con.query("SELECT * FROM reglas", function (error, result, client){
+                cb(error, result)
+            })
+
+
+        }
+    }, function(error, results) {
+        if (!error) {
+
+            var resultadosClientes = [];
+            
+            // console.log(results.clientes.length);
+            for(i = 0; i<results.clientes.length; i++){
+        
+                resultadosClientes.push({
+                    direccionIP : results.clientes[i].direccionIP,
+                    socketID: results.clientes[i].socketID
+                });
+            }
+
+            var resultadosReglas = [];
+
+            for(i = 0; i<results.reglas.length; i++){
+        
+                resultadosReglas.push({
+                    nombre : results.reglas[i].nombre,
+                });
+            }
+
+            // console.log('Resultados clientes: ' + resultadosClientes);
+            // console.log('Resultados reglas: ' + resultadosReglas);
+            //res.send({results});
+            res.render('ejecutar-regla', {resultadosClientes:resultadosClientes, resultadosReglas:resultadosReglas});
+        }
+
+
+
+        // for(i = 0; i<results.length; i++){
+    
+        //     resultados.push({
+        //         direccionIP : results[i].direccionIP,
+        //         socketID: results[i].socketID
+        //     });
+        // }
+
+    });
+
+        // con.query('SELECT nombre FROM reglas', function (error, results, fields) {
+        //     if (error) {
+        //       console.log("\n\nERROR:\n\n", error, "\n\n");
+        //       res.send({
+        //         mensaje: error.code
+        //       })
+        //     } else {
+    
+        //         var resultados = [];
+                
+        //         console.log(results.length);
+        //         for(i = 0; i<results.length; i++){
+            
+        //             resultados.push({
+        //                 nombre : results[i].nombre,
+        //                 // socketID: results[i].socketID
+        //             });
+        //         }
+        //         res.render('clientes', {resultados:resultados});
+        //     }
+        //     });
+});
+
+// Guarda los socket clientes
+var usuariosConectados = {}
 
 io.on('connection', function(socket){
     console.log('un usuario se ha conectado');
@@ -70,50 +180,10 @@ io.on('connection', function(socket){
             //delete usuariosConectados[socket.id]; // remove the client from the array
     });
 });
+});
 
 
-// Obtener clientes:
-
-
-    // console.log('a user connected');
-    // socket.on('net', function(msg){
-    //   console.log('message: ' + msg);
-    // });
-    // string = "hola desde index.js";
-    // socket.emit('test', string);
-  });
-
-
-// router.get('/', urlencodedParser, function(req, res) {
-
-
-//     con.query('SELECT * FROM clientes', function (error, results, fields) {
-//       if (error) {
-//         console.log("\n\nERROR:\n\n", error, "\n\n");
-//         res.send({
-//           mensaje: error.code
-//         })
-//       } else {
-//         res.send({
-//             data:results
-//         })
-//       }
-//       });
-//   });
-
-// var mostrarClientes = function() {
-//     con.query('SELECT * FROM clientes', function (error, results, fields) {
-//         if (error) {
-//           console.log("\n\nERROR:\n\n", error, "\n\n");
-//           res.send({
-//             mensaje: error.code
-//           })
-//         } else {
-//             var resultArray = Object.values(JSON.parse(JSON.stringify(results)));
-//             console.log(resultArray);
-//         }
-//     });
-// }
+// Obtener clientes activos
 
 router.get('/clientes', function(req, res) {
 
@@ -139,39 +209,35 @@ router.get('/clientes', function(req, res) {
         }
         });
   })
-// router.post('/sending', urlencodedParser, function(req, res) {
 
-// var datos = {
-//     direccionIP: req.body.direccionIP,
-//     socketID: req.body.socketID
-// }
+// Subir reglas de YARA de forma local al servidor
 
-// console.log(datos);
-
-// //exports.GET = function(req, res) {
-//       db.insertarClientes(datos, function(err, results) {
-//           if (err) {
-//               res.send(500, "Server Error");
-//               return;
-//           } else {
-//               res.send(results);
-//           }
-//       });
-//     });
-
-//});
-
-// router.get('/', (req, res, next) => {
-//     res.sendFile(path.join(__dirname, '../', 'views', 'index.html'));
-// });
-
-router.get('/', (req, res, next) => {
-    res.render(path.join(__dirname, '../', 'views', 'index'));
+router.post('/upload', function(req, res) {
+    upload(req, res, (err) => {
+       if(err) {
+           res.render('index', {
+               msg:err
+           });
+       } else {
+           var nombre = req.file.originalname;
+           con.query('INSERT INTO reglas SET nombre=?', nombre, function (error, results, fields) {
+            if (error) {
+              console.log("\n\nERROR:\n\n", error.code, "\n\n");
+              res.send({
+                mensaje: error.code
+              })
+            } else {
+              res.send({
+                mensaje: "Regla insertada correctamente"
+              });
+            }
+            });
+       }
+    
+  });
 });
 
-router.get('/importar', (req, res, next) => {
-    res.render(path.join(__dirname, '../', 'views', 'importar'));
-});
+// Ejecutar regla en socket cliente, 
 
 router.post('/send', urlencodedParser, (req, res) => {
 
@@ -179,21 +245,34 @@ router.post('/send', urlencodedParser, (req, res) => {
 
 
     // elijo la regla -> select from * reglas
-    // elijo 
+    // elijo
 
     var direccionIP = req.body.direccionIP;
     var saludo = req.body.saludo;
+    console.log(saludo);
     if (usuariosConectados[direccionIP])
     console.log('usuariosConectados[direccionIP]:' + usuariosConectados[direccionIP]);
-    usuariosConectados[direccionIP].socket.emit('test', 'asdasdadasdasd');
+    usuariosConectados[direccionIP].socket.emit('test', saludo);
     res.send({
         data: "recibido"
     });
 });
 
-router.get('/', (req, res, next) => {
+// El socket cliente viene a buscar los archivos de reglas de YARA a esta ubicacion.
 
+router.get('/reglas/:file(*)',(req, res) => {
+    var file = req.params.file;
+    var fileLocation = path.join('./reglas',file);
+    console.log(fileLocation);
+    res.download(fileLocation, file); 
 });
+
+
+router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
+    console.log(req.body);
+    res.send('recibido');
+});
+
 
 return router;
 }

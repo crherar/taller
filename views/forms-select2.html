@@ -673,7 +673,22 @@
 <script src="assets/plugins/select2/js/select2.min.js"></script>
 <script>								
 $(document).ready(function() {
-    $('.select2').select2();
+	$('.select2').select2();
+	
+	$('#mySelect2').select2({
+  ajax: {
+    url: 'https://api.github.com/search/repositories',
+    data: function (params) {
+      var query = {
+        search: params.term,
+        page: params.page || 1
+      }
+
+      // Query parameters will be ?search=[term]&page=[page]
+      return query;
+    }
+  }
+});
 });
 </script>
 <!-- END Java Script for this page -->

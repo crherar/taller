@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<title>Pike Admin - Free Bootstrap 4 Admin Template</title>
+		<meta name="description" content="Free Bootstrap 4 Admin Theme | Pike Admin">
+        <meta name="author" content="Pike Web Development - https://www.pikephp.com">
+        
+
+		<!-- Favicon -->
+        <link rel="shortcut icon" href="assets/images/favicon.ico">
+        
+        <!-- Switchery css -->
+		<link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet" />
+
+
+		<!-- Bootstrap CSS -->
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		
+		<!-- Font Awesome CSS -->
+		<link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+		
+		<!-- Custom CSS -->
+		<link href="assets/css/style.css" rel="stylesheet" type="text/css" />		
+		
+		<!-- BEGIN CSS for this page -->
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>	
+		<style>	
+		td.details-control {
+		background: url('assets/plugins/datatables/img/details_open.png') no-repeat center center;
+		cursor: pointer;
+		}
+		tr.shown td.details-control {
+		background: url('assets/plugins/datatables/img/details_close.png') no-repeat center center;
+		}
+        </style>
+        <!-- BEGIN CSS for this page -->
+		<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css"/>	
+		<!-- END CSS for this page -->
+				
+</head>
+
+<body class="adminbody">
+		
+<div id="main">
+
+	<!-- top bar navigation -->
+	<div class="headerbar">
+
+		<!-- LOGO -->
+        <div class="headerbar-left">
+			<a href="index.html" class="logo"><img alt="Logo" src="assets/images/logo.png" /> <span>Admin</span></a>
+        </div>
+
+        <% include navbar %>
+
+	</div>
+	<!-- End Navigation -->
+	
+ 
+	<!-- Left Sidebar -->
+	<% include menu %>
+	<!-- End Sidebar -->
+
+
+    <div class="content-page">
+	
+		<!-- Start content -->
+        <div class="content">
+            
+			<div class="container-fluid">
+
+					
+							
+				<div class="row">
+						<div class="col-xl-12">
+								<div class="breadcrumb-holder">
+										<h1 class="main-title float-left">Ejecutar Reglas</h1>
+										<ol class="breadcrumb float-right">
+											<li class="breadcrumb-item">Home</li>
+											<li class="breadcrumb-item active">Ejecutar Reglas</li>
+										</ol>
+										<div class="clearfix"></div>
+								</div>
+						</div>
+				</div>
+				<!-- end row -->
+
+				
+
+
+				
+				<div class="row">
+				
+
+
+
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">	
+                        <form id="formejecutarregla" method="POST" action="pruebaejecutar">					
+                            <div class="card mb-3">
+                                <!-- <div class="card-header">
+                                    <h3><i class="fa fa-hand-pointer-o"></i> Ejecutar reglas</h3>
+                                </div> -->
+                                    
+                                <div class="card-body">
+                                    
+                                    <label for="example2">
+                                    Seleccionar IP
+                                    </label>	
+                                     
+                                    <select class="form-control select2" id="clientes" name="clientes" multiple="multiple">  
+                                        <option id="all" value="todas">Todas</option> 
+                                        <% for (var i = 0; i < resultadosClientes.length; i++) { %> 
+                                           <option value='<%= resultadosClientes[i].direccionIP %>'><%= resultadosClientes[i].direccionIP %></option>
+                                        <% } %>
+                                    </select>
+                                </div>												
+                           
+
+                            <div class="card-body">
+																
+                                    <label for="example1">
+                                    Seleccionar regla
+                                    </label>
+                                    <select class="form-control select2" id="reglas" name="regla">    
+                                    <% for (var i = 0; i < resultadosReglas.length; i++) { %> 
+                                        <option value='<%= resultadosReglas[i].nombre %>'><%= resultadosReglas[i].nombre %></option>
+                                    <% } %>        
+                                    </select>
+                                    
+                            </div>	
+                            <div class="card-body">
+                                    <label for="pwd">Ruta</label>
+                                    <input type="text" class="form-control" id="ruta" placeholder="Ingrese ruta" name="ruta">
+                                    
+                            </div>
+                            <div class="card-body">
+                                    <button type="submit" class="btn btn-primary">Enviar</button>                
+                            </div>															
+                            </div>
+                        </div>
+                    </form>                   
+                    </div>
+                </div>
+
+						
+				
+			
+			
+
+
+            </div>
+			<!-- END container-fluid -->
+
+		</div>
+		<!-- END content -->
+
+    </div>
+	<!-- END content-page -->
+	
+	<!-- Footer -->
+	<% include footer %>
+	<!-- End Footer -->
+
+</div>
+<!-- END main -->
+
+<script src="assets/js/modernizr.min.js"></script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/moment.min.js"></script>
+
+<script src="assets/js/popper.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+
+<script src="assets/js/detect.js"></script>
+<script src="assets/js/fastclick.js"></script>
+<script src="assets/js/jquery.blockUI.js"></script>
+<script src="assets/js/jquery.nicescroll.js"></script>
+<script src="assets/js/jquery.scrollTo.min.js"></script>
+<script src="assets/plugins/switchery/switchery.min.js"></script>
+
+<!-- App js -->
+<script src="assets/js/pikeadmin.js"></script>
+
+<!-- BEGIN Java Script for this page -->
+    <script src="assets/plugins/select2/js/select2.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    
+
+	<script>
+
+	// START CODE FOR BASIC DATA TABLE 
+	// $(document).ready(function() {
+	// 	$('#example1').DataTable();
+    // } );
+    
+    // $(document).ready(function() {
+	// 	$('#example2').DataTable();
+    // } );
+
+    // $(document).ready(function() {
+    // $('.select2').select2();
+    // });
+
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+
+	// END CODE FOR BASIC DATA TABLE 
+    
+    // $("#clientes").click(function () {
+    //  $("#clientes option").not('#all').each(function (index) {
+    //     $(this).prop('disabled', true);
+    //   });
+//   });
+	</script>	
+<!-- END Java Script for this page -->
+
+</body>
+</html>
