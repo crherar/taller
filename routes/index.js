@@ -75,7 +75,6 @@ router.get('/ejecutar-regla', (req, res, next) => {
 
             var resultadosClientes = [];
             
-            // console.log(results.clientes.length);
             for(i = 0; i<results.clientes.length; i++){
         
                 resultadosClientes.push({
@@ -93,91 +92,59 @@ router.get('/ejecutar-regla', (req, res, next) => {
                 });
             }
 
-            // console.log('Resultados clientes: ' + resultadosClientes);
-            // console.log('Resultados reglas: ' + resultadosReglas);
-            //res.send({results});
             res.render('ejecutar-regla', {resultadosClientes:resultadosClientes, resultadosReglas:resultadosReglas});
         }
-
-
-
-        // for(i = 0; i<results.length; i++){
-    
-        //     resultados.push({
-        //         direccionIP : results[i].direccionIP,
-        //         socketID: results[i].socketID
-        //     });
-        // }
-
     });
-
-        // con.query('SELECT nombre FROM reglas', function (error, results, fields) {
-        //     if (error) {
-        //       console.log("\n\nERROR:\n\n", error, "\n\n");
-        //       res.send({
-        //         mensaje: error.code
-        //       })
-        //     } else {
-    
-        //         var resultados = [];
-                
-        //         console.log(results.length);
-        //         for(i = 0; i<results.length; i++){
-            
-        //             resultados.push({
-        //                 nombre : results[i].nombre,
-        //                 // socketID: results[i].socketID
-        //             });
-        //         }
-        //         res.render('clientes', {resultados:resultados});
-        //     }
-        //     });
 });
 
 // Guarda los socket clientes
 var usuariosConectados = {}
 
 io.on('connection', function(socket){
-    console.log('un usuario se ha conectado');
+    console.log('Un usuario se ha conectado');
     socket.on('net', function(direccionIP){
 
+        // Este diccionario guarda las IP que estan conectadas con su respectivo objeto socket.
         usuariosConectados[direccionIP] = {socket}
-
+       // console.log(usuariosConectados);
+        // usuariosConectados.push({
+        //     direccionIP:socket
+        // })
+        console.log(usuariosConectados)
+        // Recibe los datos del socket cliente que se conecto.    
         datos = {
             direccionIP: direccionIP,
             socketID: socket.id
         }
 
-        console.log(datos);
+        console.log('\n\n');
+        console.log('direccionIP = ' + datos.direccionIP);
+        console.log('socketID = ' + datos.socketID);
+        console.log('\n\n');
 
-        // con.query("INSERT INTO clientes SET ?", datos, function (error, res, fields) {
-        //     if (error) {
-        //         console.log("\n\nERROR:\n\n", error.code, "\n\n");
-        //         res.send({
-        //             mensaje: error.code
-        //           });
-        //     } else {
-        //         res.send({
-        //             mensaje: "Cliente insertado exitosamente."
-        //         });
-        //     }
-        //     }); 
+        con.query("INSERT INTO clientes SET ?", datos, function (error, res, fields) {
+            if (error) {
+                console.log(error);
+                console.log('No se ha insertado el cliente porque ya se encuentra en la base de datos.');
+                //console.log("\n\nERROR:\n\n", error.code, "\n\n");
+            } else {
+                console.log("Cliente " + direccionIP + " insertado exitosamente.");
+            }
+        }); 
 
-            // con.query("SELECT * FROM clientes", function (error, results, fields) {
-            //     if (error) {
-            //         console.log("\n\nERROR:\n\n", error.code, "\n\n");
-            //         res.send({
-            //             mensaje: error.code
-            //           });
-            //     } else {
-            //         console.log(results);
-            //         res.send({
-            //             datos: results
-            //         });
-            //     }
-            // }); 
         socket.on('disconnect', function () {
-            //delete usuariosConectados[socket.id]; // remove the client from the array
+            console.log('El cliente ' + direccionIP + ' se ha desconectado.');
+
+            con.query("DELETE FROM clientes WHERE direccionIP=?", datos.direccionIP, function (error, res, fields) {
+                if (error) {
+                    console.log("\n\nERROR:\n\n", error.code, "\n\n");
+                } else {
+                    console.log("Cliente " + direccionIP + " eliminado exitosamente.");
+                    delete usuariosConectados[direccionIP];
+                }
+                console.log(usuariosConectados);
+        }); 
+            //delete usuariosConectados[socket.id]; // Remover al cliente del arreglo
     });
 });
 });
@@ -197,7 +164,6 @@ router.get('/clientes', function(req, res) {
 
             var resultados = [];
             
-            console.log(results.length);
             for(i = 0; i<results.length; i++){
         
                 resultados.push({
@@ -251,7 +217,7 @@ router.post('/send', urlencodedParser, (req, res) => {
     var saludo = req.body.saludo;
     console.log(saludo);
     if (usuariosConectados[direccionIP])
-    console.log('usuariosConectados[direccionIP]:' + usuariosConectados[direccionIP]);
+    console.log('usuariosConectados[direccionIP]:' + usuariosConectados[datos.clientes]);
     usuariosConectados[direccionIP].socket.emit('test', saludo);
     res.send({
         data: "recibido"
@@ -269,8 +235,31 @@ router.get('/reglas/:file(*)',(req, res) => {
 
 
 router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
+    
     console.log(req.body);
-    res.send('recibido');
+    var datos = {
+        clientes: req.body.clientes,
+        regla: req.body.regla,
+        ruta: req.body.ruta,
+    }
+
+
+
+    if (usuariosConectados[datos.clientes])
+    {   
+        usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos);
+        res.send({
+            data: "recibido"
+        });
+
+
+    } else {
+        console.log("El cliente no se encuentra conectado.");
+        res.send({
+            data: "El cliente no se encuentra conectado."
+        });
+    }
+    
 });
 
 
