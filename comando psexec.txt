@@ -1,0 +1,31 @@
+psexec \\10.0.2.4 -u TALLER\cris cmd
+
+
+share con everyone read
+
+
+
+1 - obtener las cuentas de dominio y passwords
+2 - correr un nmap con los rangos de la red, con las máquinas arriba.
+3 - conectarse con psexec a las máquinas arriba (listo)
+
+4 - pasarle el batch file este debe primeramente ejecutar un nmap a la red y guardar todo
+
+
+
+powershell script:
+
+1 - correr nmap para ver máquinas arriba
+2 - para cada IP debe bajar desde el servidor el node.exe
+3 - debe agregar a la variable de entorno la ruta donde descargó node js
+
+
+
+1 - nmap de toda la red
+2 - tener todas las ip arriba
+3 - para cada ip ejecutar psexec
+4 - para cada 
+
+
+
+ # "C:\Users\crisdeploy\Desktop\batprueba.bat" -i -d -f -w
