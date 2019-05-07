@@ -120,7 +120,7 @@ io.on('connection', function(socket){
         console.log('\n\n');
         console.log('direccionIP = ' + datos.direccionIP);
         console.log('socketID = ' + datos.socketID);
-        console.log('\n\n');
+        //console.log('\n\n');
 
         con.query("INSERT INTO clientes SET ?", datos, function (error, res, fields) {
             if (error) {
@@ -203,15 +203,9 @@ router.post('/upload', function(req, res) {
   });
 });
 
-// Ejecutar regla en socket cliente, 
+// Ejecutar regla en socket cliente - primer ejemplo 
 
 router.post('/send', urlencodedParser, (req, res) => {
-
-    // Parametros: regla, IP de equipo o masivo.
-
-
-    // elijo la regla -> select from * reglas
-    // elijo
 
     var direccionIP = req.body.direccionIP;
     var saludo = req.body.saludo;
@@ -233,6 +227,7 @@ router.get('/reglas/:file(*)',(req, res) => {
     res.download(fileLocation, file); 
 });
 
+// Ejecutar regla 
 
 router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     
@@ -242,8 +237,6 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
         regla: req.body.regla,
         ruta: req.body.ruta,
     }
-
-
 
     if (usuariosConectados[datos.clientes])
     {   
@@ -262,6 +255,81 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     
 });
 
+// Ejecutar regla 
 
+router.get('/recolectar-resultados',urlencodedParser, (req, res) => {
+
+    con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+        if (error) {
+          console.log("\n\nERROR:\n\n", error, "\n\n");
+          res.send({
+            mensaje: error.code
+          })
+        } else {
+
+            var resultados = [];
+            
+            for(i = 0; i<results.length; i++){
+        
+                resultados.push({
+                    direccionIP : results[i].direccionIP,
+                    //socketID: results[i].socketID
+                });
+            }
+            res.render('recolectar-resultados', {resultados:resultados});
+        }
+        });
+    
+});
+
+router.get('/api/books/', function(req, res) {
+    console.log(req.query.direccionIP);
+    // var id = req.params.hola;
+    // console.log(id)
+    var direccionIP = req.query.direccionIP;
+
+    con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+        if (error) {
+          console.log("\n\nERROR:\n\n", error, "\n\n");
+          res.send({
+            mensaje: error.code
+          })
+        } else {
+
+            console.log(JSON.stringify(results));
+            res.json(results);
+        }
+        });
+
+    // if (usuariosConectados[direccionIP])
+    // {   
+    //     usuariosConectados[direccionIP].socket.emit('obtener-resultados', datos);
+    //     res.send({
+    //         data: "recibido"
+    //     });
+    // } else {
+    //     console.log("El cliente no se encuentra conectado.");
+    //     res.send({
+    //         data: "El cliente no se encuentra conectado."
+    //     });
+    // }
+
+    
+    
+
+    // res.json({
+    //   message: 'Your database information', pico:'holi'
+    // });
+
+
+    //res.render('recolectar-resultados', {resultados:'holi'});
+});
+
+router.get('/api/books2', urlencodedParser, function(req, res) {
+    console.log(req.body)
+    res.json({
+      message: '<table><th>header</th><tr><td>hola</td></tr></table>'
+    });
+});
 return router;
 }
