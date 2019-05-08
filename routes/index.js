@@ -288,18 +288,59 @@ router.get('/api/books/', function(req, res) {
     // console.log(id)
     var direccionIP = req.query.direccionIP;
 
-    con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
-        if (error) {
-          console.log("\n\nERROR:\n\n", error, "\n\n");
-          res.send({
-            mensaje: error.code
-          })
-        } else {
+        if (usuariosConectados[direccionIP])
+        {   
+            usuariosConectados[direccionIP].socket.emit('obtener-resultados', 'tobi', 'woot', function(data) {
+                
+                var archivosMaliciosos = data;
 
-            console.log(JSON.stringify(results));
-            res.json(results);
+                var array = archivosMaliciosos.split("\n");
+                
+                array.splice(-1,1)
+
+                var registros = [];
+
+                for (var i in array){
+                    var temp = array[i].split(" ");
+                    temp.unshift(direccionIP);
+                    registros.push(temp);
+                    console.log("temp= " + temp);
+                }
+
+                for (i = 0; i < registros.length; i++)
+                {
+                    console.log("registros[" + i + "]=" + registros[i]);
+                }
+
+                // verificar primero si se encuentra el archivo
+
+                con.query('INSERT INTO archivosMaliciosos (direccionIP, clasificacion, nombre) VALUES ?', [registros], function (error, results, fields) {
+                    if (error) {
+                      console.log("\n\nERROR:\n\n", error, "\n\n");
+                    } else {
+                        console.log(JSON.stringify(results));
+                    }
+                    });
+            });
+
+        } else {
+            console.log("El cliente no se encuentra conectado.");
+            // res.send({
+            //     data: "El cliente no se encuentra conectado."
+            // });
         }
-        });
+
+        con.query('SELECT * FROM archivosMaliciosos', function (error, results, fields) {
+            if (error) {
+            console.log("\n\nERROR:\n\n", error, "\n\n");
+            res.send({
+                mensaje: error.code
+            })
+            } else {
+                console.log(JSON.stringify(results));
+                res.json(results);
+            }
+            });
 
     // if (usuariosConectados[direccionIP])
     // {   
@@ -325,11 +366,11 @@ router.get('/api/books/', function(req, res) {
     //res.render('recolectar-resultados', {resultados:'holi'});
 });
 
-router.get('/api/books2', urlencodedParser, function(req, res) {
-    console.log(req.body)
-    res.json({
-      message: '<table><th>header</th><tr><td>hola</td></tr></table>'
-    });
-});
+// router.get('/api/books2', urlencodedParser, function(req, res) {
+//     console.log(req.body)
+//     res.json({
+//       message: '<table><th>header</th><tr><td>hola</td></tr></table>'
+//     });
+// });
 return router;
 }
