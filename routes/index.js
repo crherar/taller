@@ -4,8 +4,11 @@ const mysql = require('mysql');
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
+var jwt = require('jwt-simple');
 var bodyParser = require('body-parser');
 var async = require('async');
+var crearToken = require('../services/creartoken');
+var auth = require('../middlewares/auth');
 
 //var db = require('../database');
 
@@ -34,6 +37,7 @@ con.connect(function(err) {
 const router = express.Router();
 
 var urlencodedParser = bodyParser.urlencoded({ extended: true });
+var estaAutenticado = auth.isAuth;
 
 const storage = multer.diskStorage({
     destination: 'reglas',
@@ -51,11 +55,11 @@ router.get('/', (req, res, next) => {
     res.render(path.join(__dirname, '../', 'views', 'index'));
 });
 
-router.get('/importar', (req, res, next) => {
+router.get('/importar', auth, (req, res, next) => {
     res.render(path.join(__dirname, '../', 'views', 'importar'));
 });
 
-router.get('/ejecutar-regla', (req, res, next) => {
+router.get('/ejecutar-regla', auth, (req, res, next) => {
     //res.render(path.join(__dirname, '../', 'views', 'ejecutar-regla'));
     async.series({
         clientes: function(cb) {
@@ -149,10 +153,48 @@ io.on('connection', function(socket){
 });
 });
 
+router.get('/private', auth, function(req, res){
+    res.status(200).send({mensaje: 'autorizado'});
+});
+  
+
+router.post('/login', urlencodedParser, function(req,res){
+
+    var email = req.body.email;
+    var password = req.body.password;
+  
+    console.log("\n\nDATOS OBTENIDOS LOGIN:\n");
+    console.log("Email: " + email + "\n" + "Password: " + password + "\n");
+  
+    con.query('SELECT * FROM usuarios WHERE email = ?',[email], function (error, results, fields) {
+    if (error) {
+      res.send({
+        code: 400,
+        error: error
+      });
+    }else{
+      if(results.length > 0){
+        if(results[0].password == password){
+            var token = crearToken(email);
+            //var token = jwt.sign({user:email}, 'SecretKey');
+            res.cookie('access_token', token, {httpOnly: true}).status(301).redirect('/clientes');
+            //return res.status(200).send({mensaje: 'logeado correctamente', token:token, url:'clientes'})
+        } else {
+           return res.status(401).send({mensaje: 'Usuario y/o password incorrectos.'})
+        }
+      }
+      else{
+        return res.status(401).send({mensaje: 'Usuario y/o password incorrectos.'})
+      }
+    }
+    });
+  });
+
+
 
 // Obtener clientes activos
 
-router.get('/clientes', function(req, res) {
+router.get('/clientes', auth, function(req, res) {
 
     con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
         if (error) {
@@ -257,7 +299,7 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
 
 // Ejecutar regla 
 
-router.get('/recolectar-resultados',urlencodedParser, (req, res) => {
+router.get('/recolectar-resultados', auth, urlencodedParser, (req, res) => {
 
     con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
         if (error) {

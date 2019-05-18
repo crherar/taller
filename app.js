@@ -11,6 +11,7 @@ app.set('view engine', 'ejs');
 
 app.use('/assets', express.static('assets'));
 
+
   // console.log(req.url);
   // next();
 
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 var indexRoutes = require('./routes/index')(io);
 
 app.use(indexRoutes);
+
 
 
 http.listen(3000, function(){

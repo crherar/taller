@@ -4,9 +4,9 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
-		<title>Pike Admin - Free Bootstrap 4 Admin Template</title>
-		<meta name="description" content="Free Bootstrap 4 Admin Theme | Pike Admin">
-		<meta name="author" content="Pike Web Development - https://www.pikephp.com">
+		<!-- top bar navigation -->
+		<% include title.ejs %>
+		<!-- End Navigation -->
 
 		<!-- Favicon -->
 		<link rel="shortcut icon" href="assets/images/favicon.ico">
@@ -23,13 +23,13 @@
 		<!-- BEGIN CSS for this page -->
 		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>	
 		<style>	
-		td.details-control {
-		background: url('assets/plugins/datatables/img/details_open.png') no-repeat center center;
-		cursor: pointer;
-		}
-		tr.shown td.details-control {
-		background: url('assets/plugins/datatables/img/details_close.png') no-repeat center center;
-		}
+            td.details-control {
+            background: url('assets/plugins/datatables/img/details_open.png') no-repeat center center;
+            cursor: pointer;
+            }
+            tr.shown td.details-control {
+            background: url('assets/plugins/datatables/img/details_close.png') no-repeat center center;
+            }
 		</style>		
 		<!-- END CSS for this page -->
 				
@@ -40,7 +40,7 @@
 <div id="main">
 
     <!-- top bar navigation -->
-    <% include navbarsup.ejs %>
+    <% include navbar.ejs %>
 	<!-- End Navigation -->
 	
  
