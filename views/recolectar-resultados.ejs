@@ -9,7 +9,7 @@
 		<!-- End Navigation -->
 
 		<!-- Favicon -->
-		<link rel="shortcut icon" href="assets/images/favicon.ico">
+		<!-- <link rel="shortcut icon" href="assets/images/favicon.ico"> -->
 
 		<!-- Bootstrap CSS -->
 		<link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -254,10 +254,16 @@
             $.get('/api/books', {direccionIP: direccionIP}, function(data,fields) {
                 console.log("data = " + data);
                 var rows = data;
+                var str = '';
                 for (i=0 ; i < rows.length ; i++){
                     var row = rows[i];
-                    $('#recoleccion tbody').append('<tr><td>'+row.clasificacion+'</td><td>'+row.nombre+'</td></tr>');
-                }
+                        str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td></tr>";
+             };
+
+            $('#recoleccion tbody').html(str);
+
+                //     $('#recoleccion tbody').append('<tr><td>'+row.clasificacion+'</td><td>'+row.nombre+'</td></tr>');
+                // }
             });
                 
          

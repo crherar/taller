@@ -273,28 +273,103 @@ router.get('/reglas/:file(*)',(req, res) => {
 
 router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     
-    console.log(req.body);
     var datos = {
-        clientes: req.body.clientes,
+        clientes: [req.body.clientes],
         regla: req.body.regla,
         ruta: req.body.ruta,
     }
-
-    if (usuariosConectados[datos.clientes])
-    {   
-        usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos);
-        res.send({
-            data: "recibido"
-        });
-
-
-    } else {
-        console.log("El cliente no se encuentra conectado.");
-        res.send({
-            data: "El cliente no se encuentra conectado."
-        });
-    }
     
+    var escaneadoConExito = [];
+    var escaneadoConError = [];
+
+    // for (var k in datos){
+    //     if (datos.hasOwnProperty(k)) {
+    //          console.log("Key is " + k + ", value is " + typeof(datos[k]));
+    //     }
+    // }
+    // var keys = Object.keys(myObject);
+
+    // console.log(typeof(datos.clientes).toString());
+    var str = (datos.clientes).toString();
+    // console.log('str =' + str);
+    // console.log('typeof str =' + typeof(str));
+    var clientesArray = str.split(',');
+    // console.log(clientesArray);
+    // console.log(clientesArray.length);
+    // console.log(typeof(clientesArray));
+
+    if ((clientesArray).includes("todas")){
+            console.log("incluye todas");
+            //clientesArray.splice(clientesArray.indexOf('todas'), 1);
+            // console.log('Escaneando todas las IP...');
+            // console.log('Lista de IPs = ' + clientesArray);
+            con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+                if (error) {
+                  console.log("\n\nERROR:\n\n", error, "\n\n");
+                  res.send({
+                    mensaje: error.code
+                  })
+                } else {                    
+                    for(i = 0; i<results.length; i++){
+                            
+                        console.log(results[i].direccionIP);   
+
+                            if (usuariosConectados[results[i].direccionIP])
+                            {   
+                                usuariosConectados[results[i].direccionIP].socket.emit('ejecutar-regla', datos);
+                                escaneadoConExito.push({
+                                    key:   results[i].direccionIP,
+                                    value: "Recibido."
+                                });
+                            } 
+                                else {
+                                    escaneadoConError.push({
+                                        key:   results[i].direccionIP,
+                                        value: "Cliente no se encuentra conectado."
+                                    });
+                                }
+                            }
+                    } 
+                });
+                res.send('OK');
+
+        } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
+            console.log('clientesArray=' + clientesArray);
+            console.log(clientesArray.length);
+                for(var i in clientesArray){
+                    console.log('i= ' + i)
+                    if (usuariosConectados[clientesArray[i]])
+                    {   
+                        console.log(usuariosConectados[clientesArray[i]]);
+                        usuariosConectados[clientesArray[i]].socket.emit('ejecutar-regla', datos);
+                        escaneadoConExito.push({
+                            key:   clientesArray[i],
+                            value: "Recibido."
+                        });
+                    } 
+                    else {
+                        escaneadoConError.push({
+                            key:   clientesArray[i],
+                            value: "Cliente no se encuentra conectado."
+                        });
+                    }
+            }
+            res.send('OK');
+         
+    } else if (!(clientesArray.includes("todas")) && clientesArray.length == 1){
+        if (usuariosConectados[datos.clientes])
+        {   
+            usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos);
+            res.send({
+                data: "recibido"
+            });
+        } else {
+            console.log("El cliente no se encuentra conectado.");
+            res.send({
+                data: "El cliente no se encuentra conectado."
+            });
+        }
+    }    
 });
 
 // Ejecutar regla 
@@ -356,7 +431,7 @@ router.get('/api/books/', function(req, res) {
 
                 // verificar primero si se encuentra el archivo
 
-                con.query('INSERT INTO archivosMaliciosos (direccionIP, clasificacion, nombre) VALUES ?', [registros], function (error, results, fields) {
+                con.query('INSERT ignore INTO archivosMaliciosos (direccionIP, clasificacion, nombre) VALUES ?', [registros], function (error, results, fields) {
                     if (error) {
                       console.log("\n\nERROR:\n\n", error, "\n\n");
                     } else {
@@ -372,7 +447,7 @@ router.get('/api/books/', function(req, res) {
             // });
         }
 
-        con.query('SELECT * FROM archivosMaliciosos', function (error, results, fields) {
+        con.query('SELECT * FROM archivosMaliciosos WHERE direccionIP=?', direccionIP, function (error, results, fields) {
             if (error) {
             console.log("\n\nERROR:\n\n", error, "\n\n");
             res.send({
