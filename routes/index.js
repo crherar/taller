@@ -399,37 +399,124 @@ router.get('/recolectar-resultados', auth, urlencodedParser, (req, res) => {
     
 });
 
+router.get('/reg-reglas', auth, urlencodedParser, (req, res) => {
+
+    con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+        if (error) {
+          console.log("\n\nERROR:\n\n", error, "\n\n");
+          res.send({
+            mensaje: error.code
+          })
+        } else {
+
+            var resultados = [];
+            
+            for(i = 0; i<results.length; i++){
+        
+                resultados.push({
+                    direccionIP : results[i].direccionIP,
+                    //socketID: results[i].socketID
+                });
+            }
+            res.render('reg-reglas', {resultados:resultados});
+        }
+        });
+    
+});
+
+router.get('/reg-eliminados', auth, urlencodedParser, (req, res) => {
+
+    con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+        if (error) {
+          console.log("\n\nERROR:\n\n", error, "\n\n");
+          res.send({
+            mensaje: error.code
+          })
+        } else {
+
+            var resultados = [];
+            
+            for(i = 0; i<results.length; i++){
+        
+                resultados.push({
+                    direccionIP : results[i].direccionIP,
+                    //socketID: results[i].socketID
+                });
+            }
+            res.render('reg-eliminados', {resultados:resultados});
+        }
+        }); 
+});
+
+router.post('/eliminar-archivos', urlencodedParser, (req, res) => {
+
+console.log(req.body.myCheckboxes);
+
+var datos = {
+    direccionIP: req.body.direccionIP,
+    rutas: req.body.myCheckboxes,
+}
+
+//console.log('datos ' + datos);
+
+
+
+// if (usuariosConectados[datos.direccionIP])
+//         {   
+//             usuariosConectados[datos.direccionIP].socket.emit('eliminar-archivos', datos);
+
+
+//         } else {
+//             console.log("El cliente no se encuentra conectado.");
+//             res.send({
+//                 data: "El cliente no se encuentra conectado."
+//             });
+//         }
+
+
+res.send('ok');
+
+});
+
 router.get('/api/books/', function(req, res) {
-    console.log(req.query.direccionIP);
-    // var id = req.params.hola;
-    // console.log(id)
+
+    //console.log(req.query.direccionIP);
     var direccionIP = req.query.direccionIP;
 
         if (usuariosConectados[direccionIP])
         {   
-            usuariosConectados[direccionIP].socket.emit('obtener-resultados', 'tobi', 'woot', function(data) {
+            usuariosConectados[direccionIP].socket.emit('obtener-resultados', function(data) {
                 
-                var archivosMaliciosos = data;
+                //var archivosMaliciosos = data;
 
-                var array = archivosMaliciosos.split("\n");
+                var array = data.split("\n");
                 
                 array.splice(-1,1)
 
                 var registros = [];
 
+                //console.log(array);
+
                 for (var i in array){
-                    var temp = array[i].split(" ");
-                    temp.unshift(direccionIP);
-                    registros.push(temp);
-                    console.log("temp= " + temp);
+                    //console.log(temp)
+                    var fila = [];
+
+                    var temp = array[i].split(","); // se separa el primer array por fila a un array temp.
+
+                    temp2 = temp.toString(); // se convierte el array a string.
+                    
+                    var clasificacion = temp2.substr(0, temp2.indexOf(' ')); // se obtiene la clasificacion.
+                    var ruta = temp2.substr(temp2.indexOf(' ')+1); // se obtiene la ruta.
+
+                    fila.push(direccionIP, clasificacion, ruta); // se pushea todo a una fila nueva
+
+                    registros.push(fila);
                 }
 
                 for (i = 0; i < registros.length; i++)
                 {
                     console.log("registros[" + i + "]=" + registros[i]);
                 }
-
-                // verificar primero si se encuentra el archivo
 
                 con.query('INSERT ignore INTO archivosMaliciosos (direccionIP, clasificacion, nombre) VALUES ?', [registros], function (error, results, fields) {
                     if (error) {

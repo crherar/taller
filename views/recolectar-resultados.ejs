@@ -69,26 +69,12 @@
 								</div>
 						</div>
 				</div>
-				<!-- end row -->
-
-                    <!-- <body>
-                        <div id="holder">
-                            <%=  %>
-                        </div>
-                        <form>
-                            <button type="button" id="HButton"> HELLO </button>
-                        </form>
-                    </body> -->
 
 				
 				<div class="row">
 				
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">						
 							<div class="card mb-3">
-								<!-- <div class="card-header">
-									<h3><i class="fa fa-table"></i> Clientes activos </h3>
-									DataTables is a plug-in for the jQuery Javascript library. It is a highly flexible tool, based upon the foundations of progressive enhancement, and will add advanced interaction controls to any HTML table: pagination, instant search and multi-column ordering. <a target="_blank" href="https://datatables.net/">(more details)</a>
-								</div> -->
 									
 								<div class="card-body">
 									<div class="table-responsive">
@@ -97,14 +83,12 @@
 													<thead>
 															<tr>
 																	<th>Dirección IP</th>
-																	<!-- <th>Socket ID</th> -->
 																 </tr>
 													</thead>		
 													
 															<% for (var i = 0; i < resultados.length; i++) { %>
 															 <tr>
 															   <td class="tdvalue"><%= resultados[i].direccionIP %></td>
-															   <!-- <td><%= resultados[i].socketID%></td> -->
 															 </tr>    
 															<% } %>
 														 </table>
@@ -115,47 +99,46 @@
 							</div><!-- end card-->					
 						</div>
                         
-                        <!-- <table id="servers">
-                                <thead>
-                                  <tr>
-                                    <th width="150">Server name</th>
-                                    <th width="150">Client</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                        </table> -->
-
-                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">						
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h3>Archivos maliciosos</h3>
-                                </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12">	
+                            <form id="formEliminarArchivos" method="POST" action="eliminar-archivos">						
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h3>Archivos maliciosos</h3>
+                                    </div>
+                                        
+                                    <div class="card-body">
+                                        
+                                        <table id="recoleccion" class="table table-bordered">
+                                            <thead>
+                                                    <tr>
+                                                    <th scope="col">Clasificación</th>
+                                                    <th scope="col">Ruta</th>
+                                                    <th scope="col">Seleccionar</th>
+                                                    </tr>
+                                                </thead>
                                     
-                                <div class="card-body">
-                                    
-                                    <table id="recoleccion" class="table table-responsive-xl table-hover">
-                                      <!-- <thead>
-                                        <tr>
-                                          <th scope="col"> Ruta o nombre</th>
-                                        </tr>
-                                      </thead> -->
-                                      <tbody>
-                                            <!-- <% if (resultados) { %>
-                                            <% for (var i = 0; i < resultados.length; i++) { %>
-                                                <tr>
-                                                  <td class="tdvalue"><%= %></td>
-                                                  <!-- <td><%= resultados[i].socketID%></td> -->
-                                                </tr>    
-                                               <!-- <% } } %> -->
-                                      </tbody>
-                                    </table>
+                                            <tbody>
 
-                                </div>							
-                            </div><!-- end card-->					
+                            
+                                            </tbody>
+                                        </table>
+                                            <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
+                                    </div>							
+                                </div><!-- end card-->
+                            </form>
                         </div>
-				</div>			
-			
+                </div>
+                <!-- <div class="row">
+                    <div class="col-xl-12">
+                            <button class="btn btn-pinterest">Eliminar todos los archivos</button>
+                    </div>
+
+                    <div class="col-xl-12">
+                            <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
+                    </div>
+			    </div> -->
 
 
             </div>
@@ -185,98 +168,83 @@
 <script src="assets/js/fastclick.js"></script>
 <script src="assets/js/jquery.blockUI.js"></script>
 <script src="assets/js/jquery.nicescroll.js"></script>
-
-<!-- App js -->
 <script src="assets/js/pikeadmin.js"></script>
 
-<!-- BEGIN Java Script for this page -->
-	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
 
-	<script>
-	// START CODE FOR BASIC DATA TABLE 
-	$(document).ready(function() {
-		$('#example1').DataTable();
-	} );
-	// END CODE FOR BASIC DATA TABLE 
-	
-    </script>	
+<script>
+
+    $(document).ready(function() {
+        $('#example1').DataTable();
+    });
+
+</script>	
     
     <script>
-        $(document).ready(function () {
-            var my_div = $("#holder");
-            $("#HButton").on("click", function () {
-                $.ajax({
-                url: "/api/books2"
-            })
-                .done(function( data ) {
-                console.log( "Sample of data:", data );
-                $('#holder').html(data.message);
-          });
     
-              /* Tell app.js that I clicked a button and then app.js
-                 query the database and using ejs or something else update the
-                 my_div inner html with the database result without
-                 reloading page */
+    $(document).ready(function () {
+        var my_div = $("#holder");
+        $("#HButton").on("click", function () {
+            $.ajax({
+            url: "/api/books2"
+        })
+            .done(function( data ) {
+            console.log( "Sample of data:", data );
+            $('#holder').html(data.message);
             });
         });
+    });
 
-        $(document).ready(function(){
-	// code to read selected table row cell data (values).
-	$(".tdvalue").on('click',function(){
-		 var filaActual = $(this).closest("tr");
-		 var direccionIP = filaActual.find("td:eq(0)").text();
-		 //var data=col1+"\n"+col2+"\n"+col3;
-        //var dato = col1.text();
-         //alert(col1);
-        //  $.ajax({
-        //     type: "get",
-        //     data: {direccionIP: direccionIP},
-        //     url: "/api/books",
-        //     // success: function(response){
-        //     //     console.log("exito");
-        //     // },
-        //     // error: function(xhr){
-        //     //     console.log("error");
-        //     // }
-        //     })
-        //         .done(function( data ) {
-        //         console.log( "Sample of data:", data );
-        //         for (i=0 ; i < resultados.length ; i++){
-        //             var resultado = resultados[i];
-        //             $('#servers tbody').append('<tr><td>'+resultado.direccionIP+'</td><td>'+resultado.direccionIP+'</td></tr>');
-        //         }
-        //     });
+    // Generar tabla de archivos maliciosos
 
-                //$('#holder').html(data.message);
+    $(document).ready(function(){
+        $(".tdvalue").on('click',function(){
+            var filaActual = $(this).closest("tr");;
+            var direccionIP = filaActual.find("td:eq(0)").text();
 
+                $.get('/api/books', {direccionIP: direccionIP}, function(data,fields) {
+                    console.log("data = " + data);
+                    var rows = data;
+                    var str = '';
+                    for (i=0 ; i < rows.length ; i++){
+                        var row = rows[i];
+                            str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(2);'></td></tr>";
+                };
 
-            $.get('/api/books', {direccionIP: direccionIP}, function(data,fields) {
-                console.log("data = " + data);
-                var rows = data;
-                var str = '';
-                for (i=0 ; i < rows.length ; i++){
-                    var row = rows[i];
-                        str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td></tr>";
-             };
+                $('#recoleccion tbody').html(str);
 
-            $('#recoleccion tbody').html(str);
-
-                //     $('#recoleccion tbody').append('<tr><td>'+row.clasificacion+'</td><td>'+row.nombre+'</td></tr>');
-                // }
+                });
+                    
             });
-                
-         
+    });
 
-          
+  
+    $(document).on('submit', '#formEliminarArchivos', function(){
+        
+        var myCheckboxes = new Array();
+        
+        $("input:checked").each(function() {
+            myCheckboxes.push($(this).val());
+        });
 
-	});
-});
+        console.log(myCheckboxes);
 
+        $.ajax({
+            type: "POST",
+            url: "/eliminar-archivos",
+            data: { 
+                myCheckboxes
+            },
+            success: function(data){
+                alert(myCheckboxes);
+            }
+        });
+        return false;
+        });
 
     </script>
 
-<!-- END Java Script for this page -->
 
 </body>
 </html>
