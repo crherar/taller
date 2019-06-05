@@ -450,28 +450,34 @@ router.get('/reg-eliminados', auth, urlencodedParser, (req, res) => {
 
 router.post('/eliminar-archivos', urlencodedParser, (req, res) => {
 
-console.log(req.body.myCheckboxes);
+// console.log(req.body.cboxes);
+// console.log(req.body.direccionIP);
 
 var datos = {
     direccionIP: req.body.direccionIP,
-    rutas: req.body.myCheckboxes,
+    rutas: req.body.cboxes,
 }
 
-//console.log('datos ' + datos);
+console.log('datos.direccionIP= ' + datos.direccionIP);
+console.log('datos.cboxes= ' + datos.cboxes);
+
+// cuando se eliminan despues borrar los archivos maliciosos que se hayan borrado de la tabla de archivos maliciosos
+// 
 
 
+if (usuariosConectados[datos.direccionIP])
+        {   
+            usuariosConectados[datos.direccionIP].socket.emit('eliminar-archivos', datos, function(data) {
+                console.log(data);
+                res.send(data);
+            });
 
-// if (usuariosConectados[datos.direccionIP])
-//         {   
-//             usuariosConectados[datos.direccionIP].socket.emit('eliminar-archivos', datos);
-
-
-//         } else {
-//             console.log("El cliente no se encuentra conectado.");
-//             res.send({
-//                 data: "El cliente no se encuentra conectado."
-//             });
-//         }
+        } else {
+            console.log("El cliente no se encuentra conectado.");
+            res.send({
+                data: "El cliente no se encuentra conectado."
+            });
+        }
 
 
 res.send('ok');

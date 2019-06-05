@@ -106,6 +106,7 @@
                                 <div class="card mb-3">
                                     <div class="card-header">
                                         <h3>Archivos maliciosos</h3>
+                                        <h3 id="dirIP"></h3>
                                     </div>
                                         
                                     <div class="card-body">
@@ -179,6 +180,8 @@
         $('#example1').DataTable();
     });
 
+    var direccionIP = $('')
+
 </script>	
     
     <script>
@@ -212,6 +215,7 @@
                             str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(2);'></td></tr>";
                 };
 
+                $('#dirIP').html(direccionIP);
                 $('#recoleccion tbody').html(str);
 
                 });
@@ -221,23 +225,23 @@
 
   
     $(document).on('submit', '#formEliminarArchivos', function(){
+
+        var direccionIP = $('#dirIP').text();
         
-        var myCheckboxes = new Array();
+        var cboxes = new Array();
         
         $("input:checked").each(function() {
-            myCheckboxes.push($(this).val());
+            cboxes.push($(this).val());
         });
 
-        console.log(myCheckboxes);
+        console.log(cboxes);
 
         $.ajax({
             type: "POST",
             url: "/eliminar-archivos",
-            data: { 
-                myCheckboxes
-            },
+            data: {cboxes, direccionIP},
             success: function(data){
-                alert(myCheckboxes);
+                alert(data);
             }
         });
         return false;
