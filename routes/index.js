@@ -9,6 +9,11 @@ var bodyParser = require('body-parser');
 var async = require('async');
 var crearToken = require('../services/creartoken');
 var auth = require('../middlewares/auth');
+var moment = require('moment');
+
+var fecha = moment().format('YYYY-MM-DD');
+var hora = moment().format('h:mm:ss a');
+
 
 //var db = require('../database');
 
@@ -282,27 +287,12 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     var escaneadoConExito = [];
     var escaneadoConError = [];
 
-    // for (var k in datos){
-    //     if (datos.hasOwnProperty(k)) {
-    //          console.log("Key is " + k + ", value is " + typeof(datos[k]));
-    //     }
-    // }
-    // var keys = Object.keys(myObject);
-
-    // console.log(typeof(datos.clientes).toString());
     var str = (datos.clientes).toString();
-    // console.log('str =' + str);
-    // console.log('typeof str =' + typeof(str));
+
     var clientesArray = str.split(',');
-    // console.log(clientesArray);
-    // console.log(clientesArray.length);
-    // console.log(typeof(clientesArray));
 
     if ((clientesArray).includes("todas")){
             console.log("incluye todas");
-            //clientesArray.splice(clientesArray.indexOf('todas'), 1);
-            // console.log('Escaneando todas las IP...');
-            // console.log('Lista de IPs = ' + clientesArray);
             con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
                 if (error) {
                   console.log("\n\nERROR:\n\n", error, "\n\n");
@@ -372,7 +362,6 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     }    
 });
 
-// Ejecutar regla 
 
 router.get('/recolectar-resultados', auth, urlencodedParser, (req, res) => {
 
@@ -390,7 +379,6 @@ router.get('/recolectar-resultados', auth, urlencodedParser, (req, res) => {
         
                 resultados.push({
                     direccionIP : results[i].direccionIP,
-                    //socketID: results[i].socketID
                 });
             }
             res.render('recolectar-resultados', {resultados:resultados});
@@ -415,7 +403,6 @@ router.get('/reg-reglas', auth, urlencodedParser, (req, res) => {
         
                 resultados.push({
                     direccionIP : results[i].direccionIP,
-                    //socketID: results[i].socketID
                 });
             }
             res.render('reg-reglas', {resultados:resultados});
@@ -450,75 +437,106 @@ router.get('/reg-eliminados', auth, urlencodedParser, (req, res) => {
 
 router.post('/eliminar-archivos', urlencodedParser, (req, res) => {
 
-// console.log(req.body.cboxes);
-// console.log(req.body.direccionIP);
-
 var datos = {
     direccionIP: req.body.direccionIP,
     rutas: req.body.cboxes,
 }
 
-console.log('datos.direccionIP= ' + datos.direccionIP);
-console.log('datos.cboxes= ' + datos.cboxes);
-console.log('datos.cboxes typeof= ' + typeof(datos.cboxes));
 // cuando se eliminan despues borrar los archivos maliciosos que se hayan borrado de la tabla de archivos maliciosos
-// 
-
 
 if (usuariosConectados[datos.direccionIP])
         {   
             usuariosConectados[datos.direccionIP].socket.emit('eliminar-archivos', datos, function(data) {
-                
-                console.log((data));
-                console.log(typeof(data));
 
-                var registros = [];
+                var noEliminados = [];
 
-                for(var i=0; i<data.length; i++) {
-                    console.log('i=' + i)
+                for (var i=0; i<(data.eliminadosError).length; i++){
+                    noEliminados.push(data.eliminadosError[i][0]);
+                }
+
+                var registrosExito = [];
+                var registrosError = [];
+
+
+                for(var i=0; i<(data.eliminadosExito).length; i++) {
                     var fila = [];
-                    var ruta = data[i][0];
-                    var motivo = data[i][1];
-                    var fecha = 'test';
+                    var ruta = data.eliminadosExito[i];
+                    var fechaActual = fecha;
+                    var horaActual = hora;
                     var direccionIP = datos.direccionIP;
-                    fila.push(ruta, motivo, fecha, direccionIP);
-                    registros.push(fila);
+                    fila.push(ruta, fechaActual, horaActual, direccionIP);
+                    registrosExito.push(fila);
                 }
 
-                for (i = 0; i < registros.length; i++)
+                for(var i=0; i<(data.eliminadosError).length; i++) {
+                    var fila = [];
+                    var ruta = data.eliminadosError[i][0];
+                    var motivo = data.eliminadosError[i][1];
+                    var fechaActual = fecha;
+                    var horaActual = hora;
+                    var direccionIP = datos.direccionIP;
+                    fila.push(ruta, motivo, fechaActual, horaActual, direccionIP);
+                    registrosError.push(fila);
+                }
+
+                for (i = 0; i < registrosExito.length; i++)
                 {
-                    console.log("registros[" + i + "]=" + registros[i]);
+                    console.log("registrosExito[" + i + "]=" + registrosExito[i]);
+                }
+
+                for (i = 0; i < registrosError.length; i++)
+                {
+                    console.log("registrosError[" + i + "]=" + registrosError[i]);
+                }
+
+                if (registrosExito.length > 0) {
+                    con.query('INSERT ignore INTO archivosEliminados (ruta, fecha, hora, direccionIP) VALUES ?', [registrosExito], function (error, results, fields) {
+                        if (error) {
+                          console.log("\n\nERROR:\n\n", error, "\n\n");
+                        } else {
+                            console.log(JSON.stringify(results));
+                        }
+                    });
+                }
+
+                if (registrosError.length > 0) {
+                    con.query('INSERT ignore INTO elimErrorLog (ruta, motivo, fecha, hora, direccionIP) VALUES ?', [registrosError], function (error, results, fields) {
+                        if (error) {
+                          console.log("\n\nERROR:\n\n", error, "\n\n");
+                        } else {
+                            console.log(JSON.stringify(results));
+                        }
+                    });
                 }
 
 
 
-                // var registros = [];
-
-                // for (var i in array) {
-                //     //console.log(temp)
-                //     var fila = [];
-
-                //     var temp = array[i].split(","); // se separa el primer array por fila a un array temp.
-
-                //     temp2 = temp.toString(); // se convierte el array a string.
-                    
-                //     var clasificacion = temp2.substr(0, temp2.indexOf(' ')); // se obtiene la clasificacion.
-                //     var ruta = temp2.substr(temp2.indexOf(' ')+1); // se obtiene la ruta.
-
-                //     fila.push(direccionIP, clasificacion, ruta); // se pushea todo a una fila nueva
-
-                //     registros.push(fila);
-                // }
-                // console.log(registros);
-
-                // con.query('INSERT ignore INTO elimErrorLog (rutas, motivo, fecha, direccionIP) VALUES ?', [registros], function (error, results, fields) {
+                // con.query('SELECT * FROM archivosMaliciosos WHERE direccionIP=?', direccionIP, function (error, results, fields) {
                 //     if (error) {
-                //       console.log("\n\nERROR:\n\n", error, "\n\n");
+                //     console.log("\n\nERROR:\n\n", error, "\n\n");
+                //     res.send({
+                //         mensaje: error.code
+                //     })
                 //     } else {
                 //         console.log(JSON.stringify(results));
+                //         res.json(results);
                 //     }
-                //     });
-                res.send(data);
+                // });
+
+                // con.query('SELECT * FROM archivosMaliciosos WHERE direccionIP=?', direccionIP, function (error, results, fields) {
+                //     if (error) {
+                //     console.log("\n\nERROR:\n\n", error, "\n\n");
+                //     res.send({
+                //         mensaje: error.code
+                //     })
+                //     } else {
+                //         console.log(JSON.stringify(results));
+                //         res.json(results);
+                //     }
+                // });
+        
+
+                res.send({data, noEliminados});
             });
 
         } else {
@@ -529,16 +547,15 @@ if (usuariosConectados[datos.direccionIP])
         }
 });
 
-router.get('/api/books/', function(req, res) {
+router.get('/obtener-resultados-IP', function(req, res) {
 
-    //console.log(req.query.direccionIP);
     var direccionIP = req.query.direccionIP;
 
         if (usuariosConectados[direccionIP])
         {   
             usuariosConectados[direccionIP].socket.emit('obtener-resultados', function(data) {
                 
-                //var archivosMaliciosos = data;
+
 
                 var array = data.split("\n");
                 
@@ -546,10 +563,9 @@ router.get('/api/books/', function(req, res) {
 
                 var registros = [];
 
-                //console.log(array);
 
                 for (var i in array){
-                    //console.log(temp)
+
                     var fila = [];
 
                     var temp = array[i].split(","); // se separa el primer array por fila a un array temp.
@@ -595,37 +611,58 @@ router.get('/api/books/', function(req, res) {
                 console.log(JSON.stringify(results));
                 res.json(results);
             }
-            });
-
-    // if (usuariosConectados[direccionIP])
-    // {   
-    //     usuariosConectados[direccionIP].socket.emit('obtener-resultados', datos);
-    //     res.send({
-    //         data: "recibido"
-    //     });
-    // } else {
-    //     console.log("El cliente no se encuentra conectado.");
-    //     res.send({
-    //         data: "El cliente no se encuentra conectado."
-    //     });
-    // }
-
-    
-    
-
-    // res.json({
-    //   message: 'Your database information', pico:'holi'
-    // });
-
-
-    //res.render('recolectar-resultados', {resultados:'holi'});
+        });
 });
 
-// router.get('/api/books2', urlencodedParser, function(req, res) {
-//     console.log(req.body)
-//     res.json({
-//       message: '<table><th>header</th><tr><td>hola</td></tr></table>'
-//     });
-// });
+router.get('/obtener-logs-eliminados', function(req, res) {
+
+    var direccionIP = req.query.direccionIP;
+    console.log(req.query);
+
+    async.series({
+        archivosEliminados: function(cb) {
+            con.query("SELECT ruta, fecha, hora FROM archivosEliminados WHERE direccionIP=?", direccionIP, function (error, result, client){
+                cb(error, result);
+            })
+        },
+        eliminadosError: function(cb){
+            con.query("SELECT ruta, motivo, fecha, hora FROM elimErrorLog WHERE direccionIP=?", direccionIP, function (error, result, client){
+                cb(error, result)
+            })
+
+
+        }
+    }, function(error, results) {
+        if (!error) {
+
+            var archivosEliminados = [];
+
+            for(i = 0; i<results.archivosEliminados.length; i++){
+                console.log(results.archivosEliminados[i])
+                archivosEliminados.push({
+                    ruta : results.archivosEliminados[i].ruta,
+                    fecha: results.archivosEliminados[i].fecha,
+                    hora: results.archivosEliminados[i].hora
+                });
+            }
+
+            var eliminadosError = [];
+
+            for(i = 0; i<results.eliminadosError.length; i++){
+                console.log(results.eliminadosError[i])
+                eliminadosError.push({
+                    ruta : results.eliminadosError[i].ruta,
+                    motivo: results.eliminadosError[i].motivo,
+                    fecha: results.eliminadosError[i].fecha,
+                    hora: results.eliminadosError[i].hora
+                });
+            }
+
+            //res.render('ejecutar-regla', {resultadosClientes:resultadosClientes, resultadosReglas:resultadosReglas});
+            res.send({archivosEliminados, eliminadosError});
+        }
+    });
+});
+
 return router;
 }
