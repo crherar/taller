@@ -460,7 +460,7 @@ var datos = {
 
 console.log('datos.direccionIP= ' + datos.direccionIP);
 console.log('datos.cboxes= ' + datos.cboxes);
-
+console.log('datos.cboxes typeof= ' + typeof(datos.cboxes));
 // cuando se eliminan despues borrar los archivos maliciosos que se hayan borrado de la tabla de archivos maliciosos
 // 
 
@@ -468,7 +468,56 @@ console.log('datos.cboxes= ' + datos.cboxes);
 if (usuariosConectados[datos.direccionIP])
         {   
             usuariosConectados[datos.direccionIP].socket.emit('eliminar-archivos', datos, function(data) {
-                console.log(data);
+                
+                console.log((data));
+                console.log(typeof(data));
+
+                var registros = [];
+
+                for(var i=0; i<data.length; i++) {
+                    console.log('i=' + i)
+                    var fila = [];
+                    var ruta = data[i][0];
+                    var motivo = data[i][1];
+                    var fecha = 'test';
+                    var direccionIP = datos.direccionIP;
+                    fila.push(ruta, motivo, fecha, direccionIP);
+                    registros.push(fila);
+                }
+
+                for (i = 0; i < registros.length; i++)
+                {
+                    console.log("registros[" + i + "]=" + registros[i]);
+                }
+
+
+
+                // var registros = [];
+
+                // for (var i in array) {
+                //     //console.log(temp)
+                //     var fila = [];
+
+                //     var temp = array[i].split(","); // se separa el primer array por fila a un array temp.
+
+                //     temp2 = temp.toString(); // se convierte el array a string.
+                    
+                //     var clasificacion = temp2.substr(0, temp2.indexOf(' ')); // se obtiene la clasificacion.
+                //     var ruta = temp2.substr(temp2.indexOf(' ')+1); // se obtiene la ruta.
+
+                //     fila.push(direccionIP, clasificacion, ruta); // se pushea todo a una fila nueva
+
+                //     registros.push(fila);
+                // }
+                // console.log(registros);
+
+                // con.query('INSERT ignore INTO elimErrorLog (rutas, motivo, fecha, direccionIP) VALUES ?', [registros], function (error, results, fields) {
+                //     if (error) {
+                //       console.log("\n\nERROR:\n\n", error, "\n\n");
+                //     } else {
+                //         console.log(JSON.stringify(results));
+                //     }
+                //     });
                 res.send(data);
             });
 
@@ -478,10 +527,6 @@ if (usuariosConectados[datos.direccionIP])
                 data: "El cliente no se encuentra conectado."
             });
         }
-
-
-res.send('ok');
-
 });
 
 router.get('/api/books/', function(req, res) {

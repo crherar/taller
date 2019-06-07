@@ -131,16 +131,6 @@
                             </form>
                         </div>
                 </div>
-                <!-- <div class="row">
-                    <div class="col-xl-12">
-                            <button class="btn btn-pinterest">Eliminar todos los archivos</button>
-                    </div>
-
-                    <div class="col-xl-12">
-                            <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
-                    </div>
-			    </div> -->
-
 
             </div>
 			<!-- END container-fluid -->
@@ -241,6 +231,8 @@
             url: "/eliminar-archivos",
             data: {cboxes, direccionIP},
             success: function(data){
+                console.log(data[0]);
+                console.log(data[1]);
                 alert(data);
             }
         });
