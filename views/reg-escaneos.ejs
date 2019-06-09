@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<!-- top bar navigation -->
+		<% include title.ejs %>
+		<!-- End Navigation -->
+
+		<!-- Favicon -->
+		<!-- <link rel="shortcut icon" href="assets/images/favicon.ico"> -->
+
+		<!-- Bootstrap CSS -->
+		<link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		
+		<!-- Font Awesome CSS -->
+		<link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+		
+		<!-- Custom CSS -->
+		<link href="assets/css/style.css" rel="stylesheet" type="text/css" />		
+		
+		<!-- BEGIN CSS for this page -->
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>	
+		<style>	
+            td.details-control {
+            background: url('assets/plugins/datatables/img/details_open.png') no-repeat center center;
+            cursor: pointer;
+            }
+            tr.shown td.details-control {
+            background: url('assets/plugins/datatables/img/details_close.png') no-repeat center center;
+            }
+		</style>		
+		<!-- END CSS for this page -->
+				
+</head>
+
+<body class="adminbody">
+		
+<div id="main">
+
+    <!-- top bar navigation -->
+    <% include navbar.ejs %>
+	<!-- End Navigation -->
+	
+ 
+	<!-- Left Sidebar -->
+	<% include menu %>
+	<!-- End Sidebar -->
+
+
+    <div class="content-page">
+	
+		<!-- Start content -->
+        <div class="content">
+            
+			<div class="container-fluid">
+
+							
+				<div class="row">
+						<div class="col-xl-12">
+								<div class="breadcrumb-holder">
+										<h1 class="main-title float-left">Escaneos realizados</h1>
+										<ol class="breadcrumb float-right">
+											<li class="breadcrumb-item">Home</li>
+											<li class="breadcrumb-item active">Escaneos Realizados</li>
+										</ol>
+										<div class="clearfix"></div>
+								</div>
+						</div>
+				</div>
+
+                    <div class="row">
+                        <div class="col-xl-12">						
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h3>Escaneos exitosos</h3>
+                                </div>
+                                    
+                                <div class="card-body">
+                                    
+                                    <table id="escaneosExitosos" class="table table-bordered table-hover display">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">ID Scan</th>
+                                                <th scope="col">IP</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Hora Inicial</th>
+                                                <th scope="col">Hora Término</th>
+                                                <th scope="col">Regla</th>
+                                                <th scope="col">Ruta</th>
+                                                <!-- <th scope="col">Código</th> -->
+                                                </tr>
+                                        </thead>
+                                      <tbody>
+                                            <% if (escaneosExitosos) { %>
+                                            <% for (var i = 0; i < escaneosExitosos.length; i++) { %>
+                                                <tr>
+                                                  <td><%= escaneosExitosos[i].id%></td> 
+                                                  <td><%= escaneosExitosos[i].direccionIP%></td>
+                                                  <td><%= escaneosExitosos[i].fecha%></td>
+                                                  <td><%= escaneosExitosos[i].horaInicio%></td>
+                                                  <td><%= escaneosExitosos[i].horaTermino%></td>
+                                                  <td><%= escaneosExitosos[i].regla%></td>
+                                                  <td><%= escaneosExitosos[i].ruta%></td>
+                                                  <!-- <td><%= escaneosExitosos[i].codigo%></td> -->
+                                                </tr>    
+                                            <% }}%>
+                                      </tbody>
+                                    </table>
+
+                                </div>							
+                            </div><!-- end card-->					
+                        </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">						
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3>Escaneos erroneos</h3>
+                            </div>
+                                
+                            <div class="card-body">
+                                
+                                <table id="escaneosErroneos" class="table table-bordered table-hover display">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID Scan</th>
+                                            <th scope="col">IP</th>
+                                            <th scope="col">Fecha</th>
+                                            <th scope="col">Hora Inicial</th>
+                                            <th scope="col">Hora Término</th>
+                                            <th scope="col">Regla</th>
+                                            <th scope="col">Ruta</th>
+                                            <th scope="col">Tipo Error</th>
+                                            <th scope="col">Reintentar Scan</th>
+                                            </tr>
+                                    </thead>
+                                  <tbody>
+                                    <% if (escaneosErroneos) { %>
+                                        <% for (var i = 0; i < escaneosErroneos.length; i++) { %>
+                                            <tr>
+                                              <td><%= escaneosErroneos[i].id%></td> 
+                                              <td><%= escaneosErroneos[i].direccionIP%></td>
+                                              <td><%= escaneosErroneos[i].fecha%></td>
+                                              <td><%= escaneosErroneos[i].horaInicio%></td>
+                                              <td><%= escaneosErroneos[i].horaTermino%></td>
+                                              <td><%= escaneosErroneos[i].regla%></td>
+                                              <td><%= escaneosErroneos[i].ruta%></td>
+                                              <td><%= escaneosErroneos[i].codigo%></td>
+                                              <td><button class='btnReintento'>Reintentar</button></td>
+                                            </tr>    
+                                        <% }}%>
+                                  </tbody>
+                                </table>
+
+                            </div>							
+                        </div><!-- end card-->					
+                    </div>
+            </div>			
+			
+
+
+            </div>
+			<!-- END container-fluid -->
+
+		</div>
+		<!-- END content -->
+
+    </div>
+	<!-- END content-page -->
+    
+	<!-- Footer -->
+	<% include footer %>
+	<!-- End Footer -->
+
+</div>
+<!-- END main -->
+
+<script src="assets/js/modernizr.min.js"></script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/moment.min.js"></script>
+
+<script src="assets/js/popper.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+
+<script src="assets/js/detect.js"></script>
+<script src="assets/js/fastclick.js"></script>
+<script src="assets/js/jquery.blockUI.js"></script>
+<script src="assets/js/jquery.nicescroll.js"></script>
+
+<!-- App js -->
+<script src="assets/js/pikeadmin.js"></script>
+
+<!-- BEGIN Java Script for this page -->
+	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+	<script>
+
+    $(document).ready(function() {
+        $('#escaneosExitosos').DataTable();
+    });
+
+    var direccionIP = $('')
+
+
+    $(document).ready(function() {
+        $('#escaneosErroneos').DataTable();
+    });
+
+	
+    </script>	
+    
+    <script>
+
+        $(document).ready(function(){
+
+        $(".btnReintento").on('click',function(){
+            var filaActual = $(this).closest("tr");
+            var datos = {
+                clientes: filaActual.find("td:eq(1)").text(),
+                regla: filaActual.find("td:eq(5)").text(),
+                ruta: filaActual.find("td:eq(6)").text(),
+            }
+
+            console.log(datos);
+
+            // $.post('/pruebaejecutar', datos, function(data,fields) {
+            //         // console.log("data = " + data);
+            //         // var rows = data;
+            //         // var str = '';
+            //         // for (i=0 ; i < rows.length ; i++){
+            //         //     var row = rows[i];
+            //         //         str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(2);'></td></tr>";
+            // });
+
+            $.ajax({
+                type: "POST",
+                url: "/pruebaejecutar",
+                data: datos,
+                success: function(data){
+                    alert(data);
+                    //alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
+                }
+            });
+	    });
+});
+
+
+    </script>
+
+
+</body>
+</html>

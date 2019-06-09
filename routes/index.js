@@ -10,9 +10,8 @@ var async = require('async');
 var crearToken = require('../services/creartoken');
 var auth = require('../middlewares/auth');
 var moment = require('moment');
-
 var fecha = moment().format('YYYY-MM-DD');
-var hora = moment().format('h:mm:ss a');
+var hora = moment().format('HH:mm:ss');
 
 
 //var db = require('../database');
@@ -275,9 +274,16 @@ router.get('/reglas/:file(*)',(req, res) => {
 });
 
 // Ejecutar regla 
+function setValue(valor) {
+    idInsercion = valor;
+    console.log(idInsercion);
+}
+
+var idInsercion = '';   
 
 router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
-    
+
+     
     var datos = {
         clientes: [req.body.clientes],
         regla: req.body.regla,
@@ -287,13 +293,15 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
     var escaneadoConExito = [];
     var escaneadoConError = [];
 
+    console.log(datos);
+
     var str = (datos.clientes).toString();
 
     var clientesArray = str.split(',');
 
     if ((clientesArray).includes("todas")){
             console.log("incluye todas");
-            con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
+            con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields,) {
                 if (error) {
                   console.log("\n\nERROR:\n\n", error, "\n\n");
                   res.send({
@@ -306,58 +314,128 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
 
                             if (usuariosConectados[results[i].direccionIP])
                             {   
-                                usuariosConectados[results[i].direccionIP].socket.emit('ejecutar-regla', datos);
-                                escaneadoConExito.push({
-                                    key:   results[i].direccionIP,
-                                    value: "Recibido."
+                                var direccionIP = results[i].direccionIP;
+
+                                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, hora, datos.ruta, datos.regla], function (error, results, fields) {
+                                    if (error) {
+                                      console.log("\n\nERROR:\n\n", error, "\n\n");
+                                    } else {
+                                        console.log(JSON.stringify(results));
+                                        setValue(results.insertId);
+                                    }
+                                });
+
+                                usuariosConectados[results[i].direccionIP].socket.emit('ejecutar-regla', datos, function(data){
+
+                                    console.log('El cliente ' + direccionIP + 'termino con el código: ' + data);
+
+                                    var codigo = data;
+
+                                    var horaTermino = moment().format('HH:mm:ss')
+
+                                    con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+                                        if (error) {
+                                          console.log("\n\nERROR:\n\n", error, "\n\n");
+                                        } else {
+                                            console.log(JSON.stringify(results));
+                                        }
+                                    });
+                                });
+                            }
+                            else {
+
+                                var direccionIP = results[i].direccionIP;
+                                // si el cliente no se encontraba conectado insertar el fin del escan en scansrealizados
+                                var codigo = 'El cliente no se encontraba conectado.';
+
+                                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, horaTermino=?, ruta=?, regla=?, codigo=? ', [direccionIP, fecha, hora, hora, datos.ruta, datos.regla, codigo], function (error, results, fields) {
+                                    if (error) {
+                                      console.log("\n\nERROR:\n\n", error, "\n\n");
+                                    } else {
+                                        console.log(JSON.stringify(results));
+                                    }
                                 });
                             } 
-                                else {
-                                    escaneadoConError.push({
-                                        key:   results[i].direccionIP,
-                                        value: "Cliente no se encuentra conectado."
-                                    });
-                                }
-                            }
-                    } 
-                });
-                res.send('OK');
+                    }
+                } 
+            });
+            
+            res.send('OK');
 
         } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
-            console.log('clientesArray=' + clientesArray);
-            console.log(clientesArray.length);
                 for(var i in clientesArray){
-                    console.log('i= ' + i)
                     if (usuariosConectados[clientesArray[i]])
                     {   
                         console.log(usuariosConectados[clientesArray[i]]);
-                        usuariosConectados[clientesArray[i]].socket.emit('ejecutar-regla', datos);
-                        escaneadoConExito.push({
-                            key:   clientesArray[i],
-                            value: "Recibido."
+
+                        var direccionIP = clientesArray[i];
+
+                        con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, hora, datos.ruta, datos.regla], function (error, results, fields) {
+                            if (error) {
+                              console.log("\n\nERROR:\n\n", error, "\n\n");
+                            } else {
+                                console.log(JSON.stringify(results));
+                                setValue(results.insertId);
+                            }
                         });
+
+                        usuariosConectados[clientesArray[i]].socket.emit('ejecutar-regla', datos, function(data){
+
+                            console.log('El cliente ' + direccionIP + 'termino con el código: ' + data);
+
+                            var codigo = data;
+
+                            var horaTermino = moment().format('HH:mm:ss')
+
+                            con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+                                if (error) {
+                                  console.log("\n\nERROR:\n\n", error, "\n\n");
+                                } else {
+                                    console.log(JSON.stringify(results));
+                                }
+                            });
+                        });
+                        
                     } 
-                    else {
-                        escaneadoConError.push({
-                            key:   clientesArray[i],
-                            value: "Cliente no se encuentra conectado."
-                        });
-                    }
-            }
+                }
             res.send('OK');
          
     } else if (!(clientesArray.includes("todas")) && clientesArray.length == 1){
         if (usuariosConectados[datos.clientes])
         {   
-            usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos);
-            res.send({
-                data: "recibido"
+            var direccionIP = datos.clientes;
+
+            con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, hora, datos.ruta, datos.regla], function (error, results, fields) {
+                if (error) {
+                  console.log("\n\nERROR:\n\n", error, "\n\n");
+                } else {
+                    console.log(JSON.stringify(results));
+                    setValue(results.insertId);
+                }
             });
+
+            usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos, function(data){
+
+                console.log('El cliente ' + direccionIP + 'termino con el código: ' + data);
+
+                var codigo = data;
+
+                var horaTermino = moment().format('HH:mm:ss')
+
+                con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+                    if (error) {
+                      console.log("\n\nERROR:\n\n", error, "\n\n");
+                    } else {
+                        console.log(JSON.stringify(results));
+                    }
+                });
+            });
+
+            res.send('OK');
+           
         } else {
             console.log("El cliente no se encuentra conectado.");
-            res.send({
-                data: "El cliente no se encuentra conectado."
-            });
+            res.send("El cliente no se encuentra conectado.");
         }
     }    
 });
@@ -409,6 +487,69 @@ router.get('/reg-reglas', auth, urlencodedParser, (req, res) => {
         }
         });
     
+});
+
+router.get('/reg-escaneos', auth, urlencodedParser, (req, res) => {
+
+    //var direccionIP = req.query.direccionIP;
+    //console.log(req.query);
+
+    async.series({
+        escaneosExitosos: function(cb) {
+            con.query("SELECT * FROM escaneosRealizados WHERE codigo=?", '0', function (error, result, client){
+                cb(error, result);
+            })
+        },
+        escaneosErroneos: function(cb){
+            con.query("SELECT * FROM escaneosRealizados WHERE codigo<>?", '0', function (error, result, client){
+                cb(error, result)
+            })
+
+
+        }
+    }, function(error, results) {
+        if (!error) {
+
+            var escaneosExitosos = [];
+
+            for(i = 0; i<results.escaneosExitosos.length; i++){
+                console.log(results.escaneosExitosos[i])
+                escaneosExitosos.push({
+                    id: results.escaneosExitosos[i].id,
+                    direccionIP: results.escaneosExitosos[i].direccionIP,
+                    fecha: results.escaneosExitosos[i].fecha,
+                    horaInicio: results.escaneosExitosos[i].horaInicio,
+                    horaTermino: results.escaneosExitosos[i].horaTermino,
+                    ruta: results.escaneosExitosos[i].ruta,
+                    regla: results.escaneosExitosos[i].regla,
+                    codigo: results.escaneosExitosos[i].codigo,
+
+                });
+                escaneosExitosos[i].fecha = escaneosExitosos[i].fecha.toISOString().substr(0,10);
+            }
+
+            var escaneosErroneos = [];
+
+            for(i = 0; i<results.escaneosErroneos.length; i++){
+                console.log(results.escaneosErroneos[i])
+                escaneosErroneos.push({
+                    id: results.escaneosErroneos[i].id,
+                    direccionIP: results.escaneosErroneos[i].direccionIP,
+                    fecha: results.escaneosErroneos[i].fecha,
+                    horaInicio: results.escaneosErroneos[i].horaInicio,
+                    horaTermino: results.escaneosErroneos[i].horaTermino,
+                    ruta: results.escaneosErroneos[i].ruta,
+                    regla: results.escaneosErroneos[i].regla,
+                    codigo: results.escaneosErroneos[i].codigo,
+                });
+                escaneosErroneos[i].fecha = escaneosErroneos[i].fecha.toISOString().substr(0,10);
+                if (escaneosErroneos[i].horaTermino == '00:00:00') {
+                    escaneosErroneos[i].codigo = 'El cliente se desconectó abruptamente.'
+                }
+            }
+            res.render('reg-escaneos', {escaneosExitosos:escaneosExitosos, escaneosErroneos:escaneosErroneos});
+        }
+    });
 });
 
 router.get('/reg-eliminados', auth, urlencodedParser, (req, res) => {
@@ -508,34 +649,7 @@ if (usuariosConectados[datos.direccionIP])
                         }
                     });
                 }
-
-
-
-                // con.query('SELECT * FROM archivosMaliciosos WHERE direccionIP=?', direccionIP, function (error, results, fields) {
-                //     if (error) {
-                //     console.log("\n\nERROR:\n\n", error, "\n\n");
-                //     res.send({
-                //         mensaje: error.code
-                //     })
-                //     } else {
-                //         console.log(JSON.stringify(results));
-                //         res.json(results);
-                //     }
-                // });
-
-                // con.query('SELECT * FROM archivosMaliciosos WHERE direccionIP=?', direccionIP, function (error, results, fields) {
-                //     if (error) {
-                //     console.log("\n\nERROR:\n\n", error, "\n\n");
-                //     res.send({
-                //         mensaje: error.code
-                //     })
-                //     } else {
-                //         console.log(JSON.stringify(results));
-                //         res.json(results);
-                //     }
-                // });
         
-
                 res.send({data, noEliminados});
             });
 
@@ -554,8 +668,6 @@ router.get('/obtener-resultados-IP', function(req, res) {
         if (usuariosConectados[direccionIP])
         {   
             usuariosConectados[direccionIP].socket.emit('obtener-resultados', function(data) {
-                
-
 
                 var array = data.split("\n");
                 
@@ -644,6 +756,7 @@ router.get('/obtener-logs-eliminados', function(req, res) {
                     fecha: results.archivosEliminados[i].fecha,
                     hora: results.archivosEliminados[i].hora
                 });
+                archivosEliminados[i].fecha = archivosEliminados[i].fecha.toISOString().substr(0,10);
             }
 
             var eliminadosError = [];
@@ -656,6 +769,8 @@ router.get('/obtener-logs-eliminados', function(req, res) {
                     fecha: results.eliminadosError[i].fecha,
                     hora: results.eliminadosError[i].hora
                 });
+                console.log((eliminadosError[i].fecha).toISOString().substr(0,10));
+                eliminadosError[i].fecha = eliminadosError[i].fecha.toISOString().substr(0,10);
             }
 
             //res.render('ejecutar-regla', {resultadosClientes:resultadosClientes, resultadosReglas:resultadosReglas});

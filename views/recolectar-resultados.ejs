@@ -172,22 +172,25 @@
 
     var direccionIP = $('')
 
-</script>	
+
+</script>
+
+
     
     <script>
     
-    $(document).ready(function () {
-        var my_div = $("#holder");
-        $("#HButton").on("click", function () {
-            $.ajax({
-            url: "/api/books2"
-        })
-            .done(function( data ) {
-            console.log( "Sample of data:", data );
-            $('#holder').html(data.message);
-            });
-        });
-    });
+    // $(document).ready(function () {
+    //     var my_div = $("#holder");
+    //     $("#HButton").on("click", function () {
+    //         $.ajax({
+    //         url: "/api/books2"
+    //     })
+    //         .done(function( data ) {
+    //         console.log( "Sample of data:", data );
+    //         $('#holder').html(data.message);
+    //         });
+    //     });
+    // });
 
     // Generar tabla de archivos maliciosos
 
