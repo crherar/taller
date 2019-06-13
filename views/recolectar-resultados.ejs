@@ -73,7 +73,8 @@
 				
 				<div class="row">
 				
-						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 col-xl-6">						
+						<div class="col-xl-12">	
+                            <form id="formEliminarArchivos" method="POST" action="eliminar-archivos">					
 							<div class="card mb-3">
 									
 								<div class="card-body">
@@ -82,25 +83,34 @@
 											<table id="example1" class="table table-bordered table-hover display">
 													<thead>
 															<tr>
-																	<th>Dirección IP</th>
-																 </tr>
+                                                                <th>Dirección IP</th>
+                                                                <th>Tipo de Malware</th>
+                                                                <th>Ruta</th>
+                                                                <th>Eliminar</th>
+                                                                <!-- <th>Dirección IP</th> -->
+															</tr>
 													</thead>		
-													
-															<% for (var i = 0; i < resultados.length; i++) { %>
+															<% for (var i = 0; i < results.length; i++) { %>
 															 <tr>
-															   <td class="tdvalue"><%= resultados[i].direccionIP %></td>
+                                                               <td class="tdvalue"><%= results[i].direccionIP %></td>
+                                                               <td class="tdvalue"><%= results[i].clasificacion %></td>
+                                                               <td class="tdvalue"><%= results[i].nombre %></td>
+                                                               <td style='text-align: center;'><input class='tdruta' type='checkbox' value='<%= results[i].nombre %>' style='transform: scale(2);'></td>
 															 </tr>    
 															<% } %>
-														 </table>
-											</table>
+														 
+                                            </table>
+                                            <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
+                                            <input type='checkbox' id="select_all">Seleccionar todos</input>
 									</div>
 									
 								</div>														
-							</div><!-- end card-->					
+                            </div><!-- end card-->
+                        </form>					
 						</div>
                         
-                    </div>
-                    <div class="row">
+                </div>
+                    <!-- <div class="row"> 
                         <div class="col-xl-12">	
                             <form id="formEliminarArchivos" method="POST" action="eliminar-archivos">						
                                 <div class="card mb-3">
@@ -111,7 +121,7 @@
                                         
                                     <div class="card-body">
                                         
-                                        <table id="recoleccion" class="table table-bordered">
+                                        <table id="recoleccion" class="table table-bordered table-hover display">
                                             <thead>
                                                     <tr>
                                                     <th scope="col">Clasificación</th>
@@ -125,11 +135,12 @@
                             
                                             </tbody>
                                         </table>
-                                            <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
+                                           
                                     </div>							
-                                </div><!-- end card-->
+                                </div> end card 
                             </form>
-                        </div>
+                        </div >-->
+
                 </div>
 
             </div>
@@ -167,7 +178,13 @@
 <script>
 
     $(document).ready(function() {
-        $('#example1').DataTable();
+        $('#example1').DataTable({
+            "pageLength": 100
+        });
+    });
+
+    $(document).ready(function() {
+        $('#recoleccion').DataTable();
     });
 
     var direccionIP = $('')
@@ -196,7 +213,7 @@
 
     $(document).ready(function(){
         $(".tdvalue").on('click',function(){
-            var filaActual = $(this).closest("tr");;
+            var filaActual = $(this).closest("tr");
             var direccionIP = filaActual.find("td:eq(0)").text();
 
                 $.get('/obtener-resultados-IP', {direccionIP: direccionIP}, function(data,fields) {
@@ -216,23 +233,53 @@
             });
     });
 
-  
+
+    $('#select_all').change(function() {
+        var checkboxes = $(this).closest('form').find(':checkbox');
+        checkboxes.prop('checked', $(this).is(':checked'));
+    });
+    
+    //var checkboxes = $(this).closest('form').find(':checkbox').not($(this));
+
+    $(document).on('click', function(){
+
+
+
+    })
+
+
     $(document).on('submit', '#formEliminarArchivos', function(){
 
-        var direccionIP = $('#dirIP').text();
-        
-        var cboxes = new Array();
-        
-        $("input:checked").each(function() {
-            cboxes.push($(this).val());
-        });
+        //var direccionIP = $('#dirIP').text();
 
-        console.log(cboxes);
+        //var cboxes = new Array();
+
+        var datos = {}
+        //var cboxes = new Array();
+
+        $("input:checked").each(function() {
+            var filaActual = $(this).closest("tr");
+            var direccionIP = filaActual.find("td:eq(0)").text();
+            if (!datos[direccionIP]) {
+                datos[direccionIP] = [];
+            }
+            datos[direccionIP].push($(this).val());
+            //console.log(datos);
+            //console.log(direccionIP);
+            //var direccionIP = $(this).find()
+            //cboxes.push($(this).val());
+            //aqui ira el objeto
+     });
+
+    // alert(datos)
+    
+     //console.log(datos);
+       // console.log(cboxes);
 
         $.ajax({
             type: "POST",
             url: "/eliminar-archivos",
-            data: {cboxes, direccionIP},
+            data: {datos},
             success: function(data){
                 alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
             }

@@ -226,15 +226,6 @@
 
             console.log(datos);
 
-            // $.post('/pruebaejecutar', datos, function(data,fields) {
-            //         // console.log("data = " + data);
-            //         // var rows = data;
-            //         // var str = '';
-            //         // for (i=0 ; i < rows.length ; i++){
-            //         //     var row = rows[i];
-            //         //         str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(2);'></td></tr>";
-            // });
-
             $.ajax({
                 type: "POST",
                 url: "/pruebaejecutar",
@@ -244,7 +235,8 @@
                     //alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
                 }
             });
-	    });
+        location.reload();
+        });
 });
 
 
