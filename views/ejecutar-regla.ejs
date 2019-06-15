@@ -178,34 +178,36 @@
     <script src="assets/plugins/select2/js/select2.min.js"></script>
 	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
-    
-
 	<script>
-
-	// START CODE FOR BASIC DATA TABLE 
-	// $(document).ready(function() {
-	// 	$('#example1').DataTable();
-    // } );
-    
-    // $(document).ready(function() {
-	// 	$('#example2').DataTable();
-    // } );
-
-    // $(document).ready(function() {
-    // $('.select2').select2();
-    // });
 
     $(document).ready(function() {
         $('.select2').select2();
     });
 
-	// END CODE FOR BASIC DATA TABLE 
-    
-    // $("#clientes").click(function () {
-    //  $("#clientes option").not('#all').each(function (index) {
-    //     $(this).prop('disabled', true);
-    //   });
-//   });
+    $(document).on('submit', '#formejecutarregla', function(){
+
+    var form = $(this);
+
+    var type = form.attr('method');
+    var url = form.attr('action');
+    var data = form.serialize();
+
+    //alert(type + url + data)
+
+    $.ajax({
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: form.serialize(),
+        success: function(data){
+            alert(data);
+            console.log(data);
+            //alert('Orden recibida por: ' + data.escaneadosConExito + 'equipos \n' + '\nNo se pudo establecer conexión con los siguientes equipos:\n' + data.escaneadosConError)
+            //alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
+        }   
+    });
+        return false;
+    });
+
 	</script>	
 <!-- END Java Script for this page -->
 
