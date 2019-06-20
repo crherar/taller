@@ -71,7 +71,7 @@
 				</div>
 
                     <div class="row">
-                        <div class="col-xl-12">						
+                        <div class="col-xl-12">	
                             <div class="card mb-3">
                                 <div class="card-header">
                                     <h3>Escaneos exitosos</h3>
@@ -114,8 +114,10 @@
                         </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-12">						
+                    <div class="col-xl-12">	
+                    <form id="formReintentoScan">								
                         <div class="card mb-3">
+                            
                             <div class="card-header">
                                 <h3>Escaneos erroneos</h3>
                             </div>
@@ -148,14 +150,18 @@
                                               <td><%= escaneosErroneos[i].regla%></td>
                                               <td><%= escaneosErroneos[i].ruta%></td>
                                               <td><%= escaneosErroneos[i].codigo%></td>
-                                              <td><button class='btnReintento'>Reintentar</button></td>
+                                              <!-- <td><button class='btnReintento'>Reintentar</button></td> -->
+                                              <td style='text-align: center;'><input type='checkbox' style='transform: scale(2);'></td>
                                             </tr>    
                                         <% }}%>
                                   </tbody>
                                 </table>
+                                <button class="btn btn-googleplus">Reintentar scan para computadores seleccionados </button>
+                                <input type="checkbox" id="select_all" style="transform: scale(2); margin-left: 20px; margin-right: 5px"> SELECCIONAR TODOS</input>
 
                             </div>							
-                        </div><!-- end card-->					
+                        </div><!-- end card-->	
+                    </form>					
                     </div>
             </div>			
 			
@@ -193,54 +199,65 @@
 <script src="assets/js/pikeadmin.js"></script>
 
 <!-- BEGIN Java Script for this page -->
-	<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
 
-	<script>
+<script>
 
     $(document).ready(function() {
-        $('#escaneosExitosos').DataTable();
+        $('#escaneosExitosos').DataTable({
+            "pageLength": 100
+        });
     });
 
-    var direccionIP = $('')
-
 
     $(document).ready(function() {
-        $('#escaneosErroneos').DataTable();
+        $('#escaneosErroneos').DataTable({
+            "pageLength": 100
+        });
     });
 
 	
-    </script>	
+</script>	
     
-    <script>
+<script>
 
-        $(document).ready(function(){
 
-        $(".btnReintento").on('click',function(){
-            var filaActual = $(this).closest("tr");
-            var datos = {
-                clientes: filaActual.find("td:eq(1)").text(),
-                regla: filaActual.find("td:eq(5)").text(),
-                ruta: filaActual.find("td:eq(6)").text(),
-            }
+    $('#select_all').change(function() {
+        var checkboxes = $(this).closest('form').find(':checkbox');
+        checkboxes.prop('checked', $(this).is(':checked'));
+    });
 
-            console.log(datos);
 
-            $.ajax({
+    $(document).on('submit', '#formReintentoScan', function(){
+
+        var datos = [];
+
+        $("input:checked").each(function() {
+                var filaActual = $(this).closest("tr");
+                var fila = [];
+                var cliente = filaActual.find("td:eq(1)").text();
+                var regla = filaActual.find("td:eq(5)").text();
+                var ruta = filaActual.find("td:eq(6)").text();
+                fila.push(cliente, regla, ruta);
+                datos.push(fila);
+        });
+
+        $.ajax({
                 type: "POST",
-                url: "/pruebaejecutar",
-                data: datos,
+                url: "/reescanear",
+                data: {datos},
                 success: function(data){
                     alert(data);
-                    //alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
+                    //console.log(data.reescanConExito + data.reescanConError);
+                    // alert('Orden recibida por los siguientes clientes:\n\n' + data.reescanConExito + '\n\nLos siguientes equipos no se encuentran conectados:\n\n' + data.reescanConError);
+                    //alert(data.reescanConExito + data.reescanConError);
                 }
             });
-        location.reload();
+            return false;
         });
-});
 
-
-    </script>
+</script>
 
 
 </body>

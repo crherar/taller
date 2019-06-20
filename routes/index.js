@@ -281,227 +281,225 @@ function setValue(valor) {
 
 var idInsercion = '';
 
+async function escanear(ip, regla, ruta, callback) {
+
+    var datos = {
+        regla: regla,
+        ruta: ruta,
+    }
+
+    var horaInicio = moment().format('HH:mm:ss');
+
+    con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [ip, fecha, horaInicio, datos.ruta, datos.regla], function (error, results, fields) {
+        if (error) {
+            console.log("\n\nERROR:\n\n", error, "\n\n");
+        } else {
+            console.log(JSON.stringify(results));
+            var idInsercion = results.insertId;
+            if(usuariosConectados[ip]) {
+                usuariosConectados[ip].socket.emit('ejecutar-regla', datos, function(data){
+
+                    console.log('El cliente ' + ip + ' termino con el código: ' + data);
+    
+                    var codigo = data;
+
+                    if (codigo == '1') {
+                        codigo = 'El proceso terminó de forma erronea.';
+                    }
+
+                    var horaTermino = moment().format('HH:mm:ss');
+    
+                    con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+                        if (error) {
+                            console.log("\n\nERROR:\n\n", error, "\n\n");
+                        } else {
+                            console.log(JSON.stringify(results));
+                        }
+                    });
+                    callback(data);  
+                });
+            } 
+        }
+    });
+}
+
+
 
 router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
 
-     
     var datos = {
         clientes: [req.body.clientes],
         regla: req.body.regla,
         ruta: req.body.ruta,
     }
     
-
-    console.log(datos);
-
     var str = (datos.clientes).toString();
-
     var clientesArray = str.split(',');
 
+    var escaneadoConExito = [];
+    var escaneadoConError = [];
+
     if ((clientesArray).includes("todas")){
-
-        let escaneadoConExito = [];
-        let escaneadoConError = [];
-
-            console.log("incluye todas");
-            con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields,) {
+        con.query('SELECT direccionIP FROM clientes', function (error, results, fields) {
                 if (error) {
                   console.log("\n\nERROR:\n\n", error, "\n\n");
                   res.send({
                     mensaje: error.code
                   })
-                } else {                    
+                } else {   
+                    var direccionesIP = [];
                     for(i = 0; i<results.length; i++){
-                            
-                        console.log(results[i].direccionIP);   
-
-                            if (usuariosConectados[results[i].direccionIP])
-                            {   
-                                var direccionIP = results[i].direccionIP;
-                                var horaInicio = moment().format('HH:mm:ss');
-
-                                escaneadoConExito.push(direccionIP);
-
-                                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, horaInicio, datos.ruta, datos.regla], function (error, results, fields) {
-                                    if (error) {
-                                      console.log("\n\nERROR:\n\n", error, "\n\n");
-                                    } else {
-                                        console.log(JSON.stringify(results));
-                                        setValue(results.insertId);
-                                    }
-                                });
-
-                                usuariosConectados[results[i].direccionIP].socket.emit('ejecutar-regla', datos, function(data){
-
-                                    console.log('El cliente ' + direccionIP + 'termino con el código: ' + data);
-
-                                    var codigo = data;
-
-                                    var horaTermino = moment().format('HH:mm:ss');
-
-                                    con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
-                                        if (error) {
-                                          console.log("\n\nERROR:\n\n", error, "\n\n");
-                                        } else {
-                                            console.log(JSON.stringify(results));
-                                        }
-                                    });
-                                });
-                            }
-                            else {
-
-                                var direccionIP = results[i].direccionIP;
-                                // si el cliente no se encontraba conectado insertar el fin del escan en scansrealizados
-                                var codigo = 'El cliente no se encontraba conectado.';
-
-                                escaneadoConError.push(direccionIP);
-
-                                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, horaTermino=?, ruta=?, regla=?, codigo=? ', [direccionIP, fecha, hora, hora, datos.ruta, datos.regla, codigo], function (error, results, fields) {
-                                    if (error) {
-                                      console.log("\n\nERROR:\n\n", error, "\n\n");
-                                    } else {
-                                        console.log(JSON.stringify(results));
-                                    }
-                                });
-                            } 
+                        console.log('RESULTS[' + i + ']= ' + results[i].direccionIP);                 
+                        direccionesIP.push(results[i].direccionIP);
                     }
-                } 
-            });
-            //console.log('escaneados: ' + escaneadoConError + escaneadoConExito)      
-            res.send('Enviado');
-
-        } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
-                for(var i in clientesArray){
-                    if (usuariosConectados[clientesArray[i]])
-                    {   
-                        console.log(usuariosConectados[clientesArray[i]]);
-
-                        var direccionIP = clientesArray[i];
-                        var horaInicio = moment().format('HH:mm:ss')
-
-                        escaneadoConExito.push(direccionIP);
-
-                        con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, horaInicio, datos.ruta, datos.regla], function (error, results, fields) {
-                            if (error) {
-                              console.log("\n\nERROR:\n\n", error, "\n\n");
-                            } else {
-                                console.log(JSON.stringify(results));
-                                setValue(results.insertId);
-                            }
-                        });
-
-                        usuariosConectados[clientesArray[i]].socket.emit('ejecutar-regla', datos, function(data){
-
-                            console.log('El cliente ' + direccionIP + 'termino con el código: ' + data);
-
-                            var codigo = data;
-
-                            var horaTermino = moment().format('HH:mm:ss');
-
-                            con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+                    async.forEachOfSeries(direccionesIP, function(value, key, callback) {
+                        if (!usuariosConectados[value]){
+                            var hora = moment().format('HH:mm:ss');
+                            var codigo = 'No se pudo establecer conexión con el cliente.';
+                            con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, horaTermino=?, ruta=?, regla=?, codigo=? ', [value, fecha, hora, hora, datos.ruta, datos.regla, codigo], function (error, results, fields) {
                                 if (error) {
-                                  console.log("\n\nERROR:\n\n", error, "\n\n");
+                                    console.log("\n\nERROR:\n\n", error, "\n\n");
                                 } else {
                                     console.log(JSON.stringify(results));
                                 }
                             });
-                        });
-                        
-                    } 
-                }
-            res.send('Enviado');
-         
-    } else if (!(clientesArray.includes("todas")) && clientesArray.length == 1){
-        if (usuariosConectados[datos.clientes])
-        {   
-            var direccionIP = datos.clientes;
-            var horaInicio = moment().format('HH:mm:ss');
-
-            con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=? ', [direccionIP, fecha, horaInicio, datos.ruta, datos.regla], function (error, results, fields) {
-                if (error) {
-                  console.log("\n\nERROR:\n\n", error, "\n\n");
-                } else {
-                    console.log(JSON.stringify(results));
-                    setValue(results.insertId);
+                            //escaneadoConError.push(value);
+                        } else {
+                            escanear(value, datos.regla, datos.ruta, function(err) {
+                                if(err) {
+                                    callback(err);
+                                    return;
+                                } 
+                            });
+                            callback();
+                            //escaneadoConExito.push(value);
+                        }
+                    }, function(err){
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('todo bien');
+                        }
+                    });  
                 }
             });
+            //res.send({escaneadoConExito, escaneadoConError});
+            res.send('Enviado');
 
-            usuariosConectados[datos.clientes].socket.emit('ejecutar-regla', datos, function(data){
+        } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
 
-                console.log('El cliente ' + direccionIP + ' termino con el código: ' + data);
-
-                if(!usuariosConectados[datos.clientes]) {
-                    console.log('EL PERDIO CONEXION');
+            async.forEachOfSeries(clientesArray, function(value, key, callback) {
+                if (!usuariosConectados[value]){
+                    var hora = moment().format('HH:mm:ss');
+                    var codigo = 'No se pudo establecer conexión con el cliente.';
+                    con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, horaTermino=?, ruta=?, regla=?, codigo=? ', [value, fecha, hora, hora, datos.ruta, datos.regla, codigo], function (error, results, fields) {
+                        if (error) {
+                            console.log("\n\nERROR:\n\n", error, "\n\n");
+                        } else {
+                            console.log(JSON.stringify(results));
+                        }
+                    });
+                    //escaneadoConError.push(value);
+                } else {
+                    escanear(value, datos.regla, datos.ruta, function(err) {
+                        if(err) {
+                            callback(err);
+                            return;
+                        } 
+                    });
+                    callback();
+                    //escaneadoConExito.push(value);
                 }
-
-                var codigo = data;
-
-                if (codigo == '1') {
-                    codigo = 'El proceso terminó de forma erronea.';
+            }, function(err){
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('todo bien');
                 }
+            });
+            //res.send({escaneadoConExito, escaneadoConError});
+            res.send('Enviado');
 
-                var fechaActual = moment().format('YYYY-MM-DD');
-                var horaTermino = moment().format('HH:mm:ss');
+        } else if (!(clientesArray.includes("todas")) && clientesArray.length == 1) {
 
-                con.query('UPDATE escaneosRealizados SET horaTermino=?, codigo=? WHERE id=?', [horaTermino, codigo, idInsercion], function (error, results, fields) {
+            var direccionIP = datos.clientes;
+            var ruta = datos.ruta;
+            var regla = datos.regla;
+            var horaInicio = moment().format('HH:mm:ss');
+            var codigo = 'No se pudo establecer conexión con el cliente.';
+            
+            if (usuariosConectados[direccionIP])
+            {   
+                escanear(direccionIP, datos.regla, datos.ruta, function(err) {
+                    if(err) {
+                        console.log(err);
+                        return;
+                    } 
+                });
+                res.send('Enviado');
+            
+            } else {
+                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=?, codigo=?', [direccionIP, fecha, horaInicio, ruta, regla, codigo], function (error, results, fields) {
                     if (error) {
-                      console.log("\n\nERROR:\n\n", error, "\n\n");
+                    console.log("\n\nERROR:\n\n", error, "\n\n");
                     } else {
                         console.log(JSON.stringify(results));
                     }
                 });
-            });
-
-            res.send('Enviado');
-           
-        } else {
-            
-            var direccionIP = datos.clientes;
-            var ruta = datos.ruta;
-            var regla = datos.regla;
-            var fechaActual = moment().format('YYYY-MM-DD');
-            var horaInicio = moment().format('HH:mm:ss');
-            var codigo = 'No se pudo establecer conexión con el cliente.';
-
-            con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=?, codigo=?', [direccionIP, fecha, horaInicio, ruta, regla, codigo], function (error, results, fields) {
-                if (error) {
-                  console.log("\n\nERROR:\n\n", error, "\n\n");
-                } else {
-                    console.log(JSON.stringify(results));
-                    //setValue(results.insertId);
-                }
-            });
-
-            console.log("El cliente no se encuentra conectado.");
-            res.send("El cliente no se encuentra conectado.");
-        }
-    }    
+                console.log("El cliente no se encuentra conectado.");
+                res.send("El cliente no se encuentra conectado.");
+            }
+        }    
 });
 
 
-// router.get('/recolectar-resultados', auth, urlencodedParser, (req, res) => {
+router.post('/reescanear',urlencodedParser, (req, res) => {
 
-//     con.query('SELECT direccionIP, socketID FROM clientes', function (error, results, fields) {
-//         if (error) {
-//           console.log("\n\nERROR:\n\n", error, "\n\n");
-//           res.send({
-//             mensaje: error.code
-//           })
-//         } else {
+    var datos = req.body;
+    datos = datos['datos'];
 
-//             var resultados = [];
-            
-//             for(i = 0; i<results.length; i++){
-        
-//                 resultados.push({
-//                     direccionIP : results[i].direccionIP,
-//                 });
-//             }
-//             res.render('recolectar-resultados', {resultados:resultados});
-//         }
-//         });
-    
-// });
+    var reescanConExito = [];
+    var reescanConError = [];
+   // var direccionP = [];
+
+    console.log(datos.length);
+
+    async.forEachOfSeries(datos, function(value, key, callback) {
+
+        let direccionIP = value[0];
+        let regla = value[1];
+        let ruta = value[2];
+
+        if (!usuariosConectados[direccionIP]){
+                var hora = moment().format('HH:mm:ss');
+                var codigo = 'No se pudo establecer conexión con el cliente.';
+                con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, horaTermino=?, ruta=?, regla=?, codigo=? ', [direccionIP, fecha, hora, hora, ruta, regla, codigo], function (error, results, fields) {
+                    if (error) {
+                        console.log("\n\nERROR:\n\n", error, "\n\n");
+                    } else {
+                        console.log(JSON.stringify(results));
+                    }
+                });
+                //reescanConError.push(direccionIP);
+            } else {
+                escanear(direccionIP, regla, ruta, function(err) {
+                    if(err) {
+                        callback(err);
+                        return;
+                    } 
+                });
+                //reeescanConExito.push(direccionIP);
+            }
+        }, function(err){
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('todo bien');
+            }
+    });
+    res.send('ok');
+});
+
 
 router.get('/reg-reglas', auth, urlencodedParser, (req, res) => {
 
@@ -551,7 +549,7 @@ router.get('/reg-escaneos', auth, urlencodedParser, (req, res) => {
             var escaneosExitosos = [];
 
             for(i = 0; i<results.escaneosExitosos.length; i++){
-                console.log(results.escaneosExitosos[i])
+                //console.log(results.escaneosExitosos[i])
                 escaneosExitosos.push({
                     id: results.escaneosExitosos[i].id,
                     direccionIP: results.escaneosExitosos[i].direccionIP,
@@ -569,7 +567,7 @@ router.get('/reg-escaneos', auth, urlencodedParser, (req, res) => {
             var escaneosErroneos = [];
 
             for(i = 0; i<results.escaneosErroneos.length; i++){
-                console.log(results.escaneosErroneos[i])
+                //console.log(results.escaneosErroneos[i])
                 escaneosErroneos.push({
                     id: results.escaneosErroneos[i].id,
                     direccionIP: results.escaneosErroneos[i].direccionIP,
@@ -627,17 +625,21 @@ var datos = req.body.datos;
 //console.log(datos);
 
 var usuariosNoConectados = [];
+var usuariosConectadosAct = [];
+
+var respuesta = {};
 
 // cuando se eliminan despues borrar los archivos maliciosos que se hayan borrado de la tabla de archivos maliciosos
 
 for (var i in req.body.datos){
 
-    var dirIP = i;
+    let direccionIP = i;
     //console.log('i = ' + i);
     //console.log('datos[i] = ' + datos[i]);
 
     if (usuariosConectados[i])
-        {   
+        {
+            usuariosConectadosAct.push(direccionIP);
             usuariosConectados[i].socket.emit('eliminar-archivos', datos[i], function(data) {
 
                 var noEliminados = [];
@@ -656,7 +658,7 @@ for (var i in req.body.datos){
                     var ruta = data.eliminadosExito[i];
                     var fechaActual = moment().format('YYYY-MM-DD');
                     var horaActual = moment().format('HH:mm:ss');
-                    var direccionIP = dirIP;
+                    //var direccionIP = dirIP;
                     fila.push(ruta, fechaActual, horaActual, direccionIP);
                     registrosExito.push(fila);
                     subarrayEliminar.push(direccionIP, ruta)
@@ -669,7 +671,7 @@ for (var i in req.body.datos){
                     var motivo = data.eliminadosError[i][1];
                     var fechaActual = moment().format('YYYY-MM-DD');
                     var horaActual = moment().format('HH:mm:ss');
-                    var direccionIP = dirIP;
+                    //var direccionIP = dirIP;
                     fila.push(ruta, motivo, fechaActual, horaActual, direccionIP);
                     registrosError.push(fila);
                 }
@@ -684,10 +686,10 @@ for (var i in req.body.datos){
                     console.log("registrosError[" + i + "]=" + registrosError[i]);
                 }
 
-                for (i = 0; i < eliminar.length; i++)
-                {
-                    console.log("eliminar[" + i + "]=" +  eliminar[i]);
-                }
+                // for (i = 0; i < eliminar.length; i++)
+                // {
+                //     console.log("eliminar[" + i + "]=" +  eliminar[i]);
+                // }
 
                 if (registrosExito.length > 0) {
 
@@ -720,15 +722,15 @@ for (var i in req.body.datos){
                     });
                 }
         
-                res.send({data, noEliminados});
             });
 
         } else {
-            //usuariosNoConectados.push(i)
+            usuariosNoConectados.push(direccionIP)
             console.log("El cliente no se encuentra conectado.");
         }
     }
-    //res.send({data, noEliminados, usuariosNoConectados});
+    //console.log(usuariosNoConectados + ' ' + respuesta['10.0.2.4']);
+    res.send({usuariosConectadosAct, usuariosNoConectados});
 });
 
 
@@ -891,9 +893,79 @@ router.get('/obtener-logs-eliminados', function(req, res) {
     });
 });
 
-router.get('/global', function(req, res) {
+function percentage(partialValue, totalValue) {
+    return (100 * partialValue) / totalValue;
+ } 
 
+ router.get('/global', function(req, res) {
     res.render('global');
+ });
+
+router.get('/graficos', function(req, res) {
+
+    async.series({
+        cantClientes: function(cb) {
+            con.query("SELECT COUNT(direccionIP) as cantidad FROM clientes", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        malwareMasFrecuente: function(cb) {
+            con.query("SELECT clasificacion, COUNT(*) maximo FROM archivosMaliciosos GROUP BY clasificacion ORDER BY maximo DESC LIMIT 1", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        tipoMalwarePorCliente: function(cb) {
+            con.query("SELECT direccionIP, GROUP_CONCAT(DISTINCT(clasificacion)) clasificacion FROM archivosMaliciosos GROUP BY direccionIP", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        cantTipoMalware: function(cb) {
+            con.query("SELECT clasificacion FROM archivosMaliciosos GROUP BY clasificacion", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        cantMalwarePorcentaje: function(cb) {
+            con.query("SELECT clasificacion, COUNT(*) as Total FROM archivosMaliciosos GROUP BY clasificacion", function (error, result, client){
+                cb(error, result);
+            })
+        },
+        cantClientesInfectados: function(cb){
+            con.query("SELECT direccionIP FROM archivosMaliciosos GROUP BY direccionIP", function (error, result, client){
+                cb(error, result)
+            })
+
+
+        }
+    }, function(error, results) {
+        if (!error) {
+
+            var cantClientes = results.cantClientes;
+            var malwareMasFrecuente = results.malwareMasFrecuente;
+            var tipoMalwarePorCliente = results.tipoMalwarePorCliente;
+            var tipoMalware = results.cantTipoMalware.length;
+            var cantTipoMalware = results.cantTipoMalware.length;
+            var cantMalwarePorcentaje = results.cantMalwarePorcentaje;
+            var clientesInfectados = results.cantClientesInfectados;
+            var cantClientesInfectados = results.cantClientesInfectados.length;
+            var cantMalwarePorcentaje = results.cantMalwarePorcentaje;
+            //console.log(results.cantClientes);
+            console.log(clientesInfectados);
+            console.log(tipoMalwarePorCliente);
+            console.log(malwareMasFrecuente);
+
+
+            res.send({
+                cantClientes:cantClientes,
+                malwareMasFrecuente: malwareMasFrecuente,
+                tipoMalwarePorCliente:tipoMalwarePorCliente,
+                cantTipoMalware:cantTipoMalware, 
+                cantMalwarePorcentaje:cantMalwarePorcentaje,
+                clientesInfectados:clientesInfectados,
+                cantClientesInfectados:cantClientesInfectados});
+        }
+    });
+
+    //res.render('global');
 });
 
 return router;

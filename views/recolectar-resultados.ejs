@@ -281,7 +281,10 @@
             url: "/eliminar-archivos",
             data: {datos},
             success: function(data){
-                alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
+                //alert(data);
+                console.log(data)
+                alert('Orden recibida por los siguientes clientes:\n\n' + data.usuariosConectadosAct + '\n\nLos siguientes equipos no se encuentran conectados:\n\n' + data.usuariosNoConectados);
+                //alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
             }
         });
         return false;
