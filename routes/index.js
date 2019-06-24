@@ -225,6 +225,8 @@ router.get('/clientes', auth, function(req, res) {
 // Subir reglas de YARA de forma local al servidor
 
 router.post('/upload', function(req, res) {
+
+    console.log(req.body);
     upload(req, res, (err) => {
        if(err) {
            res.render('index', {
@@ -235,13 +237,9 @@ router.post('/upload', function(req, res) {
            con.query('INSERT INTO reglas SET nombre=?', nombre, function (error, results, fields) {
             if (error) {
               console.log("\n\nERROR:\n\n", error.code, "\n\n");
-              res.send({
-                mensaje: error.code
-              })
+              res.send(error.code);
             } else {
-              res.send({
-                mensaje: "Regla insertada correctamente"
-              });
+              res.send('Regla insertada correctamente. \nEsta estará disponible en el módulo "Ejecutar Regla".');
             }
             });
        }
@@ -384,7 +382,7 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
                 }
             });
             //res.send({escaneadoConExito, escaneadoConError});
-            res.send('Enviado');
+            res.send('Orden enviada. Los resultados estarán disponibles en el módulo "Recolectar Resultados" una vez el escaneo finalice. \n Puede revisar el módulo de "Registro de Escaneos" para ver el registro histórico de escaneos.');
 
         } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
 
@@ -418,7 +416,7 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
                 }
             });
             //res.send({escaneadoConExito, escaneadoConError});
-            res.send('Enviado');
+            res.send('Orden enviada. Los resultados estarán disponibles en el módulo "Recolectar Resultados" una vez el escaneo finalice. \n Puede revisar el módulo de "Registro de Escaneos" para ver el registro histórico de escaneos.');
 
         } else if (!(clientesArray.includes("todas")) && clientesArray.length == 1) {
 
@@ -436,7 +434,7 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
                         return;
                     } 
                 });
-                res.send('Enviado');
+                res.send('Orden enviada. Los resultados estarán disponibles en el módulo "Recolectar Resultados" una vez el escaneo finalice. \n Puede revisar el módulo de "Registro de Escaneos" para ver el registro histórico de escaneos realizados.');
             
             } else {
                 con.query('INSERT INTO escaneosRealizados SET direccionIP=?, fecha=?, horaInicio=?, ruta=?, regla=?, codigo=?', [direccionIP, fecha, horaInicio, ruta, regla, codigo], function (error, results, fields) {
@@ -757,13 +755,16 @@ router.get('/recolectar-resultados', function(req, res) {
                             console.log('ejecutando en results[' + i + '].direccionIP=' + direccionIP);
                                 var array = data.split("\n");
                     
-                                //array.splice(-1,1)
+                                array.splice(-1,1)
                 
                                 var registros = [];
+                                var registroHistorico = [];
+                                var fechaActual = moment().format('YYYY-MM-DD');
                 
                                 for (var i in array){
                 
                                     var fila = [];
+                                    var filaHistorico = [];
                 
                                     var temp = array[i].split(","); // se separa el primer array por fila a un array temp.
                 
@@ -773,13 +774,20 @@ router.get('/recolectar-resultados', function(req, res) {
                                     var ruta = temp2.substr(temp2.indexOf(' ')+1); // se obtiene la ruta.
                 
                                     fila.push(direccionIP, clasificacion, ruta); // se pushea todo a una fila nueva
-                
+                                    filaHistorico.push(direccionIP, clasificacion, ruta, fechaActual);
+
                                     registros.push(fila);
+                                    registroHistorico.push(filaHistorico);
                                 }
                 
                                 for (i = 0; i < registros.length; i++)
                                 {
                                     console.log("registros[" + i + "]=" + registros[i]);
+                                }
+
+                                for (i = 0; i < registroHistorico.length; i++)
+                                {
+                                    console.log("registroHistorico[" + i + "]=" + registroHistorico[i]);
                                 }
 
                                 con.query("DELETE FROM archivosMaliciosos WHERE direccionIP=?", direccionIP, function (error, res, fields) {
@@ -795,7 +803,18 @@ router.get('/recolectar-resultados', function(req, res) {
                                             }
                                         });
                                     }
-                                });     
+                                });
+
+
+                                con.query('INSERT ignore INTO Historico (direccionIP, clasificacion, ruta, fecha) VALUES ?', [registroHistorico], function (error, results, fields) {
+                                    if (error) {
+                                        console.log("\n\nERROR:\n\n", error, "\n\n");
+                                    } else {
+                                        console.log(JSON.stringify(results));
+                                    }
+                                });
+
+                                
                             });
                         }
                         
@@ -893,6 +912,10 @@ router.get('/obtener-logs-eliminados', function(req, res) {
     });
 });
 
+function porcentaje(valorParcial, valorTotal){
+    return(100 * valorParcial) / valorTotal;
+}
+
 function percentage(partialValue, totalValue) {
     return (100 * partialValue) / totalValue;
  } 
@@ -905,27 +928,27 @@ router.get('/graficos', function(req, res) {
 
     async.series({
         cantClientes: function(cb) {
-            con.query("SELECT COUNT(direccionIP) as cantidad FROM clientes", function (error, result, client){
+            con.query("SELECT COUNT(direccionIP) as cantidad FROM Historico", function (error, result, client){
                 cb(error, result);
             })
         },
         malwareMasFrecuente: function(cb) {
-            con.query("SELECT clasificacion, COUNT(*) maximo FROM archivosMaliciosos GROUP BY clasificacion ORDER BY maximo DESC LIMIT 1", function (error, result, client){
+            con.query("SELECT clasificacion, COUNT(*) maximo FROM Historico GROUP BY clasificacion ORDER BY maximo DESC LIMIT 1", function (error, result, client){
                 cb(error, result);
             })
         },
         tipoMalwarePorCliente: function(cb) {
-            con.query("SELECT direccionIP, GROUP_CONCAT(DISTINCT(clasificacion)) clasificacion FROM archivosMaliciosos GROUP BY direccionIP", function (error, result, client){
+            con.query("SELECT direccionIP, GROUP_CONCAT(DISTINCT(clasificacion)) clasificacion FROM Historico GROUP BY direccionIP", function (error, result, client){
                 cb(error, result);
             })
         },
         cantTipoMalware: function(cb) {
-            con.query("SELECT clasificacion FROM archivosMaliciosos GROUP BY clasificacion", function (error, result, client){
+            con.query("SELECT clasificacion FROM Historico GROUP BY clasificacion", function (error, result, client){
                 cb(error, result);
             })
         },
         cantMalwarePorcentaje: function(cb) {
-            con.query("SELECT clasificacion, COUNT(*) as Total FROM archivosMaliciosos GROUP BY clasificacion", function (error, result, client){
+            con.query("SELECT clasificacion, COUNT(*) as Total FROM Historico GROUP BY clasificacion", function (error, result, client){
                 cb(error, result);
             })
         },
@@ -933,9 +956,23 @@ router.get('/graficos', function(req, res) {
             con.query("SELECT direccionIP FROM archivosMaliciosos GROUP BY direccionIP", function (error, result, client){
                 cb(error, result)
             })
+        },
+        cantMalwarePorClasificacion: function(cb){
+            con.query("SELECT clasificacion, COUNT(*) as cantidad FROM Historico GROUP BY clasificacion", function (error, result, client){
+                cb(error, result)
+            })
+        },
+        tiposMalware: function(cb){
+            con.query("SELECT clasificacion FROM Historico GROUP BY clasificacion", function (error, result, client){
+                cb(error, result)
+            })
+        },
+        cantComputadoresInfectadosPorFecha: function(cb){
+            con.query("select fecha, SUM(total) as totalcomputadores FROM ((SELECT fecha, direccionIP, COUNT(DISTINCT(direccionIP)) as total from Historico WHERE clasificacion=? GROUP BY direccionIP, MONTH(fecha))) as tbl GROUP BY MONTH(fecha)", 'Test', function (error, result, client){
+                cb(error, result)
+            })
+        },
 
-
-        }
     }, function(error, results) {
         if (!error) {
 
@@ -948,11 +985,80 @@ router.get('/graficos', function(req, res) {
             var clientesInfectados = results.cantClientesInfectados;
             var cantClientesInfectados = results.cantClientesInfectados.length;
             var cantMalwarePorcentaje = results.cantMalwarePorcentaje;
-            //console.log(results.cantClientes);
-            console.log(clientesInfectados);
-            console.log(tipoMalwarePorCliente);
-            console.log(malwareMasFrecuente);
+            var variantesMalware = results.tiposMalware;
+            
 
+           
+/*************************************************************************************************************************************/
+/******************************* Porcentaje de cada tipo de malware sobre la cantidad total de malware *******************************/
+/*************************************************************************************************************************************/
+
+
+            var cantMalwarePorClasificacion = results.cantMalwarePorClasificacion;
+
+            var cantMalwareTotal = 0;
+
+            for (var i=0; i<cantMalwarePorClasificacion.length; i++){
+                cantMalwareTotal += cantMalwarePorClasificacion[i]['cantidad'];
+            }
+
+            for (var i=0; i<cantMalwarePorClasificacion.length; i++){
+                console.log(cantMalwarePorClasificacion[i]['cantidad']);
+            }
+
+            console.log('cantMalwareTotal= ', cantMalwareTotal);
+
+            var porcentajeDeMalware = [];
+
+            for (var i=0; i<cantMalwarePorClasificacion.length; i++){
+                var objeto = {
+                    name: cantMalwarePorClasificacion[i]['clasificacion'],
+                    y: porcentaje(cantMalwarePorClasificacion[i]['cantidad'], cantMalwareTotal),
+                } 
+                console.log(objeto);
+                porcentajeDeMalware.push(objeto);
+            }
+
+/*************************************************************************************************************************************/
+/******************************* Porcentaje de cada tipo de malware sobre la cantidad total de malware *******************************/
+/*************************************************************************************************************************************/
+
+            var objFecha = {}
+
+            var cantComputadoresInfectadosPorFecha = results.cantComputadoresInfectadosPorFecha;
+            //var fecha = (cantComputadoresInfectadosPorFecha[0]['fecha']).toISOString().substr(0,10)  
+            // console.log('cantComputadoresInfectadosPorFecha= ' + parseInt(moment(cantComputadoresInfectadosPorFecha[0]['fecha']).format('MM')));
+            // console.log('cantComputadoresInfectadosPorFecha= ' + parseInt(moment(cantComputadoresInfectadosPorFecha[1]['fecha']).format('MM')));
+            // console.log('cantComputadoresInfectadosPorFecha= ' + cantComputadoresInfectadosPorFecha[0]['totalcomputadores']);
+            // console.log('cantComputadoresInfectadosPorFecha= ' + cantComputadoresInfectadosPorFecha[1]['totalcomputadores']);
+
+            var cantComputadoresInfectados = [];
+        
+            var meses = {
+                '1':'0',
+                '2':'0',
+                '3':'0',
+                '4':'0',
+                '5':'0',
+                '6':'0',
+                '7':'0',
+                '8':'0',
+                '9':'0',
+                '10':'0',
+                '11':'0',
+                '12':'0'
+            }
+            
+            for (var i=0; i<cantComputadoresInfectadosPorFecha.length; i++) {
+                meses[parseInt(moment(cantComputadoresInfectadosPorFecha[i]['fecha']).format('MM'))]=cantComputadoresInfectadosPorFecha[i]['totalcomputadores']// false, but the key exists!
+            }
+
+            for (var i in meses) {
+                cantComputadoresInfectados.push(meses[i]);
+            }
+
+            console.log(cantComputadoresInfectados);
+            
 
             res.send({
                 cantClientes:cantClientes,
@@ -961,12 +1067,80 @@ router.get('/graficos', function(req, res) {
                 cantTipoMalware:cantTipoMalware, 
                 cantMalwarePorcentaje:cantMalwarePorcentaje,
                 clientesInfectados:clientesInfectados,
-                cantClientesInfectados:cantClientesInfectados});
+                cantClientesInfectados:cantClientesInfectados,
+                porcentajeDeMalware: porcentajeDeMalware,
+                cantComputadoresInfectados: cantComputadoresInfectados,
+                variantesMalware:variantesMalware
+            });
         }
     });
 
-    //res.render('global');
 });
+
+router.get('/generarGraficoTipoMalware', function(req, res) {
+
+    //console.log(req.query.tipoMalware);
+
+    var clasificacion = req.query.tipoMalware;
+
+    async.series({
+        cantComputadoresInfectadosPorFecha: function(cb){
+            con.query("select fecha, SUM(total) as totalcomputadores FROM ((SELECT fecha, direccionIP, COUNT(DISTINCT(direccionIP)) as total from Historico WHERE clasificacion=? GROUP BY direccionIP, MONTH(fecha))) as tbl GROUP BY MONTH(fecha)", clasificacion, function (error, result, client){
+                cb(error, result)
+            })
+        },
+
+    }, function(error, results) {
+        if (!error) {
+
+            
+/*************************************************************************************************************************************/
+/******************************* Porcentaje de cada tipo de malware sobre la cantidad total de malware *******************************/
+/*************************************************************************************************************************************/
+
+            var objFecha = {}
+
+            var cantComputadoresInfectadosPorFecha = results.cantComputadoresInfectadosPorFecha;
+            //var fecha = (cantComputadoresInfectadosPorFecha[0]['fecha']).toISOString().substr(0,10)  
+            // console.log('cantComputadoresInfectadosPorFecha= ' + parseInt(moment(cantComputadoresInfectadosPorFecha[0]['fecha']).format('MM')));
+            // console.log('cantComputadoresInfectadosPorFecha= ' + parseInt(moment(cantComputadoresInfectadosPorFecha[1]['fecha']).format('MM')));
+            // console.log('cantComputadoresInfectadosPorFecha= ' + cantComputadoresInfectadosPorFecha[0]['totalcomputadores']);
+            // console.log('cantComputadoresInfectadosPorFecha= ' + cantComputadoresInfectadosPorFecha[1]['totalcomputadores']);
+
+            var cantComputadoresInfectados = [];
+        
+            var meses = {
+                '1':'0',
+                '2':'0',
+                '3':'0',
+                '4':'0',
+                '5':'0',
+                '6':'0',
+                '7':'0',
+                '8':'0',
+                '9':'0',
+                '10':'0',
+                '11':'0',
+                '12':'0'
+            }
+            
+            for (var i=0; i<cantComputadoresInfectadosPorFecha.length; i++) {
+                meses[parseInt(moment(cantComputadoresInfectadosPorFecha[i]['fecha']).format('MM'))]=cantComputadoresInfectadosPorFecha[i]['totalcomputadores']// false, but the key exists!
+            }
+
+            for (var i in meses) {
+                cantComputadoresInfectados.push(meses[i]);
+            }
+
+            console.log(cantComputadoresInfectados);
+            
+
+            res.send({ cantComputadoresInfectados: cantComputadoresInfectados, nombre:clasificacion});
+        }
+    });
+
+});
+
 
 return router;
 }

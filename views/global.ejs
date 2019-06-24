@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
@@ -82,75 +83,76 @@
 													<span class="text-white">Bounce rate: 25%</span>
 											</div>
                                     </div> -->
-                            <div class="col-xl-12">	 
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                            <h3>Alertas Generales</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class=row style="justify-content: center;"> 
-                                        <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
-                                                <div class="card-box noradius noborder bg-danger" style="min-height: 160px; min-height: 205px;">
-                                                        <!-- <i class="fa fa-bug float-right text-white"></i> -->
-                                                        <h6 class="text-white text-uppercase m-b-20">Nº Computadores Infectados</h6>
-                                                        <h1 id="cantClientesInfectados" class="m-b-20 text-white"></h1>
-                                                        <span id="spanCantClientesInfectados" class="text-white"></span>
-                                                </div>
-                                        </div>
-
-                                    <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
-											<div class="card-box noradius noborder bg-danger" style="min-height: 160px; min-height: 205px;"> <!-- min-width: 250px;-->
-													<!-- <i class="fa fa-exclamation-triangle float-right text-white"></i> -->
-													<h6 class="text-white text-uppercase m-b-20">Nº Variantes de malware</h6>
-													<h1 id="cantTipoMalware" class="m-b-20 text-white"></h1>
-													<span id="spanTipoMalware" class="text-white"></span>
-											</div>
-                                    </div>
-
-                                    <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
-											<div class="card-box noradius noborder bg-danger" style="min-height: 160px; min-height: 205px;">
-													<!-- <i class="fa fa-bug float-right text-white"></i> -->
-													<h6 class="text-white text-uppercase m-b-20">Tipo de Malware más frecuente</h6>
-													<h1 id="malwareMasFrecuente" class="m-b-20 text-white"></h1>
-													<span id="spanMalwareMasFrecuente" class="text-white"></span>
-											</div>
-                                    </div>
-                                </div>
-                                </div>
-                                </div>
-                            </div>
                                     
                                     <div class="col-xl-12">						
                                             <div class="card mb-3">
                                                 <div class="card-header">
-                                                    <h3>Equipos Infectados</h3>
-                                                </div>                                                      
+                                                    <h3>Alertas Generales</h3>
+                                                </div>                  
                                                 <div class="card-body">
-                                                    
-                                                    <table id="tabClientesInfectados" class="table table-bordered table-hover display">
-                                                        <thead>
-                                                            <tr>
-                                                            <th scope="col">Direccion IP</th>
-                                                            <th scope="col">Variantes de malware encontradas</th>
-                                                            <!-- <th scope="col">Fecha Eliminación</th>
-                                                            <th scope="col">Hora Eliminación</th> -->
-                                                            </tr>
-                                                        </thead>
-                                                      <tbody>
-                                                      </tbody>
-                                                    </table>
+                                             <div class=row>
+
+                                                <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
+                                                        <div class="card-box noradius noborder bg-default" style="min-height: 160px; min-height: 226px;">
+                                                                <!-- <i class="fa fa-bug float-right text-white"></i> -->
+                                                                <h6 class="text-white text-uppercase m-b-20">Tipo de Malware más frecuente</h6>
+                                                                <h1 id="malwareMasFrecuente" class="m-b-20 text-white"></h1>
+                                                                <span id="spanMalwareMasFrecuente" class="text-white"></span>
+                                                        </div>
+                                                </div>
+            
+                                                <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
+                                                        <div class="card-box noradius noborder bg-default" style="min-height: 160px; min-height: 226px;"> <!-- min-width: 250px;-->
+                                                                <!-- <i class="fa fa-exclamation-triangle float-right text-white"></i> -->
+                                                                <h6 class="text-white text-uppercase m-b-20">Nº Variantes de malware</h6>
+                                                                <h1 id="cantTipoMalware" class="m-b-20 text-white"></h1>
+                                                                <span id="spanTipoMalware" class="text-white"></span>
+                                                        </div>
+                                                </div>
+
+                                            </div>
                     
-                                                </div>							
+                                                </div>
+                                            </div>                                    							
                                             </div><!-- end card-->					
-                                        </div>
+                                        
 
 							</div>
-							<!-- end row -->
+                            <!-- end row -->
+                            <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h3>Distribución histórica de tipos de malware en la red</h3>
+                                    </div>                  
+                                    <div class="card-body">
 
-                            <div id="container1" style="min-width: 600px; height: 400px; margin: 0 auto; border-style: solid; margin-bottom: 20px;"></div>
-                            <div id="container2" style="min-width: 600px; max-width: 100%; height: 400px; margin: 0 auto; border-style: solid;"></div>
+                            <div id="container1" style="min-width: 600px; height: 400px; margin: 0 auto; border: 1px solid black; margin-bottom: 10px;"></div>
+                                </div>
+                            </div>
 
+                            <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h3>Número de computadores infectados por mes</h3>
+                                    </div>                  
+                                    <div class="card-body">
+                            <div class="wrapper" id="opciones" style="border: 1px solid black; margin-bottom: 10px;  border-radius: 0;">
+                            <select id="mySelect" class="form-control"></select>
+                                    <!-- <option value="">One</option>
+                                    <option value="">Two</option>
+                                    <option value="">Three</option>
+                                    <option value="">Four</option>
+                                    <option value="">Five</option>
+                                    <option value="">Six</option>
+                                    <option value="">Seven</option>
+                                    <option value="">Eight</option>
+                                    <option value="">Nine</option>
+                                    <option value="">Ten</option> -->
+                            </select>
+                            </div>  
+                        
+                            <div id="container2" style="min-width: 600px; max-width: 100%; height: 400px; margin: 0 auto; border: 1px solid black;"></div>
                         </div>
+                    </div>
+                </div>
 
 						
 
@@ -230,7 +232,7 @@
                     $("#cantClientesInfectados").html(data.cantClientesInfectados);
 
                     $("#malwareMasFrecuente").html(data.malwareMasFrecuente[0].clasificacion);
-                    $("#spanMalwareMasFrecuente").html('El malware más frecuente de la red es "' + data.malwareMasFrecuente[0].clasificacion + '" con un total de ' + data.malwareMasFrecuente[0].maximo + ' apariciones.');//de un total de ' + + 'conectados')
+                    $("#spanMalwareMasFrecuente").html('El malware más frecuente de la red es "' + data.malwareMasFrecuente[0].clasificacion + '" con un total de ' + data.malwareMasFrecuente[0].maximo + ' apariciones históricas.');//de un total de ' + + 'conectados')
 
 
                     $("#spanCantClientesInfectados").html('Se han encontrado ' + data.cantClientesInfectados + ' computadores infectados en la red.');//de un total de ' + + 'conectados')
@@ -238,175 +240,226 @@
                     $("#cantTipoMalware").html(data.cantTipoMalware);
 
 
-                    $("#spanTipoMalware").html('Se ha(n) encontrado ' + data.cantTipoMalware + ' variante(s) de malware en la red.');
+                    $("#spanTipoMalware").html('Se ha(n) encontrado ' + data.cantTipoMalware + ' variante(s) de malware en la red de forma histórica.');
+
                     //Se han encontrado 58 archivos maliciosos en total en toda la red
 
-                    
+                    var rows2 = data.variantesMalware;
+                    var str2 = '<option value="">Seleccione tipo de malware para generar gráfico</option>';
+                    for (i=0 ; i < rows2.length ; i++){
+                        var row2= rows2[i];
+                        console.log('row2=' + row2)
+
+                            str2 +=  "<option value='" + row2.clasificacion + "'>" + row2.clasificacion + "</option>";
+                    };
+                    //str2 += "</select>"
+
+                    console.log('TIPO MALWARE = ' + data.variantesMalware);
+                    $('#mySelect').html(str2);
+
+
+                    console.log(data.porcentajeDeMalware);
+
+                    var porcentajeDeMalware = data.porcentajeDeMalware;
+
+                    // Create the chart
+                    Highcharts.chart('container1', {
+                        chart: {
+                            type: 'pie'
+                        },
+                        title: {
+                            text: 'Distribución historica de tipos de malware en la red'
+                        },
+                        // subtitle: {
+                        //     text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
+                        // },
+                        plotOptions: {
+                            series: {
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.name}: {point.y:.1f}%'
+                                }
+                            }
+                        },
+
+                        tooltip: {
+                            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> del total<br/>'
+                        },
+
+                        series: [
+                            {
+                                name: "Tipo de malware",
+                                colorByPoint: true,
+                                data: porcentajeDeMalware
+                                
+                            }
+                        ]
+                    });
+
+                    // Highcharts.chart('container2', {
+                    //     chart: {
+                    //         type: 'line'
+                    //     },
+                    //     title: {
+                    //         text: 'Número de equipos infectados por mes'
+                    //     },
+                    //     xAxis: {
+                    //         categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+                    //     },
+                    //     yAxis: {
+                    //         allowDecimals: false,
+                    //         title: {
+                    //             text: 'Número de equipos infectados'
+                    //         }
+                    //     },
+                    //     plotOptions: {
+                    //         line: {
+                    //             dataLabels: {
+                    //                 enabled: true
+                    //             },
+                    //             enableMouseTracking: false
+                    //         }
+                    //     },
+                    //     series: [{
+                    //         name: 'Test',
+                    //         data: data.cantComputadoresInfectados
+                    //     }]
+                    // });
+
+                    // Highcharts.chart('container2', {
+                    //     chart: {
+                    //         type: 'column'
+                    //     },
+                    //     title: {
+                    //         text: 'Número de equipos infectados por mes'
+                    //     },
+                    //     xAxis: {
+                    //         categories: [
+                    //             'Ene',
+                    //             'Feb',
+                    //             'Mar',
+                    //             'Abr',
+                    //             'May',
+                    //             'Jun',
+                    //             'Jul',
+                    //             'Ago',
+                    //             'Sep',
+                    //             'Oct',
+                    //             'Nov',
+                    //             'Dic'
+                    //         ],
+                    //         crosshair: true
+                    //     },
+                    //     yAxis: {
+                    //         min: 0,
+                    //         title: {
+                    //             text: 'Número de equipos infectados'
+                    //         }
+                    //     },
+                    //     tooltip: {
+                    //         headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    //         pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    //             '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                    //         footerFormat: '</table>',
+                    //         shared: true,
+                    //         useHTML: true,
+                    //         valueDecimals: 0,
+                    //     },
+                    //     plotOptions: {
+                    //         column: {
+                    //             pointPadding: 0.2,
+                    //             borderWidth: 0
+                    //         }
+                    //     },
+                    //     series: [{
+                    //         name: 'Test',
+                    //         data: data.cantComputadoresInfectados
+
+                    //     }]
+                    // });
 
             }});
         });
 
+        // $("#mySelect").on("click",  function() { 
+            
+        // });
+
+        $("#mySelect").change(function(){
+            var malware = $(this).children("option:selected").val();
+            //alert("Generando gráfico del malware - " + malware);
+
+
+            $.ajax({ 
+                type: 'get',
+                url: "/generarGraficoTipoMalware",
+                context: document.body,
+                data: {tipoMalware: malware},
+                success: function(data){
+
+                    Highcharts.chart('container2', {
+                        chart: {
+                            type: 'column'
+                        },
+                        title: {
+                            text: 'Número de equipos infectados por mes'
+                        },
+                        xAxis: {
+                            categories: [
+                                'Ene',
+                                'Feb',
+                                'Mar',
+                                'Abr',
+                                'May',
+                                'Jun',
+                                'Jul',
+                                'Ago',
+                                'Sep',
+                                'Oct',
+                                'Nov',
+                                'Dic'
+                            ],
+                            crosshair: true
+                        },
+                        yAxis: {
+                            min: 0,
+                            allowDecimals: false,
+                            title: {
+                                text: 'Número de equipos infectados'
+                            }
+                        },
+                        tooltip: {
+                            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                                '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                            footerFormat: '</table>',
+                            shared: true,
+                            useHTML: true,
+                            valueDecimals: 0,
+                        },
+                        plotOptions: {
+                            column: {
+                                pointPadding: 0.2,
+                                borderWidth: 0
+                            }
+                        },
+                        series: [{
+                            name: data.nombre,
+                            data: data.cantComputadoresInfectados
+
+                        }]
+                    });
+
+            }});
+
+
+
+        });
+
+
 	</script>
 	
-    <script>
-
-// Create the chart
-Highcharts.chart('container1', {
-    chart: {
-        type: 'pie'
-    },
-    title: {
-        text: 'Porcentaje de computadores infectados'
-    },
-    // subtitle: {
-    //     text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
-    // },
-    plotOptions: {
-        series: {
-            dataLabels: {
-                enabled: true,
-                format: '{point.name}: {point.y:.1f}%'
-            }
-        }
-    },
-
-    tooltip: {
-        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
-    },
-
-    series: [
-        {
-            name: "Browsers",
-            colorByPoint: true,
-            data: [
-                {
-                    name: "Chrome",
-                    y: 62.74,
-                    drilldown: "Chrome"
-                },
-                {
-                    name: "Firefox",
-                    y: 10.57,
-                    drilldown: "Firefox"
-                },
-                {
-                    name: "Internet Explorer",
-                    y: 7.23,
-                    drilldown: "Internet Explorer"
-                },
-                {
-                    name: "Safari",
-                    y: 5.58,
-                    drilldown: "Safari"
-                },
-                {
-                    name: "Edge",
-                    y: 4.02,
-                    drilldown: "Edge"
-                },
-                {
-                    name: "Opera",
-                    y: 1.92,
-                    drilldown: "Opera"
-                },
-                {
-                    name: "Other",
-                    y: 7.62,
-                    drilldown: null
-                }
-            ]
-        }
-    ]
-});
-
-
-// Create the chart
-Highcharts.chart('container2', {
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Distribución de tipos de malware en la red'
-    },
-    // subtitle: {
-    //     text: 'Click the columns to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
-    // },
-    xAxis: {
-        type: 'category'
-    },
-    yAxis: {
-        title: {
-            text: 'Porcentaje total'
-        }
-
-    },
-    legend: {
-        enabled: false
-    },
-    plotOptions: {
-        series: {
-            borderWidth: 0,
-            dataLabels: {
-                enabled: true,
-                format: '{point.y:.1f}%'
-            }
-        }
-    },
-
-    tooltip: {
-        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> del total<br/>'
-    },
-
-    series: [
-        {
-            name: "Malware",
-            colorByPoint: true,
-            data: [
-                {
-                    name: "Chrome",
-                    y: 62.74,
-                    drilldown: "Chrome"
-                },
-                {
-                    name: "Firefox",
-                    y: 10.57,
-                    drilldown: "Firefox"
-                },
-                {
-                    name: "Internet Explorer",
-                    y: 7.23,
-                    drilldown: "Internet Explorer"
-                },
-                {
-                    name: "Safari",
-                    y: 5.58,
-                    drilldown: "Safari"
-                },
-                {
-                    name: "Edge",
-                    y: 4.02,
-                    drilldown: "Edge"
-                },
-                {
-                    name: "Opera",
-                    y: 1.92,
-                    drilldown: "Opera"
-                },
-                {
-                    name: "Other",
-                    y: 7.62,
-                    drilldown: null
-                }
-            ]
-        }
-    ],
-});
-
-
-
-</script>
 <!-- END Java Script for this page -->
 
 </body>
