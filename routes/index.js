@@ -229,17 +229,19 @@ router.post('/upload', function(req, res) {
     console.log(req.body);
     upload(req, res, (err) => {
        if(err) {
-           res.render('index', {
-               msg:err
-           });
+        //    res.render('index', {
+        //        msg:err
+        //    });
+        res.send({msg:err});
        } else {
            var nombre = req.file.originalname;
+           console.log('nombre= ' + nombre);
            con.query('INSERT INTO reglas SET nombre=?', nombre, function (error, results, fields) {
             if (error) {
               console.log("\n\nERROR:\n\n", error.code, "\n\n");
               res.send(error.code);
             } else {
-              res.send('Regla insertada correctamente. \nEsta estará disponible en el módulo "Ejecutar Regla".');
+              res.send('Regla insertada correctamente. \n\nLa regla subida estará disponible en el módulo "Ejecutar Reglas".');
             }
             });
        }
@@ -382,7 +384,7 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
                 }
             });
             //res.send({escaneadoConExito, escaneadoConError});
-            res.send('Orden enviada. Los resultados estarán disponibles en el módulo "Recolectar Resultados" una vez el escaneo finalice. \n Puede revisar el módulo de "Registro de Escaneos" para ver el registro histórico de escaneos.');
+            res.send('Orden enviada. \nLos resultados estarán disponibles en el módulo "Recolectar Resultados" una vez el escaneo finalice.\n\nPuede revisar el módulo de "Registro de Escaneos" para ver el registro histórico de escaneos.');
 
         } else if (!(clientesArray.includes("todas")) && clientesArray.length > 1) {
 
@@ -454,19 +456,54 @@ router.post('/pruebaejecutar',urlencodedParser, (req, res) => {
 router.post('/reescanear',urlencodedParser, (req, res) => {
 
     var datos = req.body;
-    datos = datos['datos'];
+    //datos = datos['datos'];
+
+    console.log(datos);
+
+    // for(i=0; i<datos.length; i++){
+    //     console.log('datos[' + i + ']=' + datos[i]);
+    // }
 
     var reescanConExito = [];
     var reescanConError = [];
    // var direccionP = [];
 
-    console.log(datos.length);
+   // console.log(datos);
 
-    async.forEachOfSeries(datos, function(value, key, callback) {
 
-        let direccionIP = value[0];
-        let regla = value[1];
-        let ruta = value[2];
+// async.forEachOfSeries(Object.keys(datos), function (value, key, callback){ 
+    
+//     let direccionIP = value;
+//     let regla = datos[value]['regla'];
+//     let ruta = datos[value]['ruta'];
+
+//     console.log('------- iteracion --------')
+//     console.log(direccionIP); // print the key
+//     console.log(regla);
+//     console.log(ruta);
+//     console.log('--------------------------')
+//     escanear(value, datos[value]['regla'], datos[value]['ruta'], function(err) {
+//         if(err) {
+//             callback(err);
+//             return;
+//         } 
+//     });
+//     // tell async that that particular element of the iterator is done
+
+//     callback(); 
+
+//     }, function(err) {
+//     console.log('iterating done');
+// });  
+
+console.log('object keys=' + Object.keys(datos));
+
+
+    async.forEachOfSeries(Object.keys(datos), function(value, key, callback) {
+
+    let direccionIP = value;
+    let regla = datos[value]['regla'];
+    let ruta = datos[value]['ruta'];
 
         if (!usuariosConectados[direccionIP]){
                 var hora = moment().format('HH:mm:ss');
@@ -478,7 +515,6 @@ router.post('/reescanear',urlencodedParser, (req, res) => {
                         console.log(JSON.stringify(results));
                     }
                 });
-                //reescanConError.push(direccionIP);
             } else {
                 escanear(direccionIP, regla, ruta, function(err) {
                     if(err) {
@@ -486,7 +522,7 @@ router.post('/reescanear',urlencodedParser, (req, res) => {
                         return;
                     } 
                 });
-                //reeescanConExito.push(direccionIP);
+                callback();
             }
         }, function(err){
             if (err) {
@@ -495,7 +531,7 @@ router.post('/reescanear',urlencodedParser, (req, res) => {
                 console.log('todo bien');
             }
     });
-    res.send('ok');
+    res.send('Reintento de scan enviado.');
 });
 
 
@@ -579,6 +615,11 @@ router.get('/reg-escaneos', auth, urlencodedParser, (req, res) => {
                 escaneosErroneos[i].fecha = escaneosErroneos[i].fecha.toISOString().substr(0,10);
                 if (escaneosErroneos[i].codigo == 'No se pudo establecer conexión con el cliente.') {
                     escaneosErroneos[i].horaTermino = '--:--:--'
+                    //escaneosErroneos[i].codigo = 'El cliente se desconectó abruptamente.'
+                }
+                if (escaneosErroneos[i].codigo == '') {
+                    escaneosErroneos[i].horaTermino = '--:--:--';
+                    escaneosErroneos[i].codigo = 'El cliente se desconectó abruptamente';
                     //escaneosErroneos[i].codigo = 'El cliente se desconectó abruptamente.'
                 }
             }

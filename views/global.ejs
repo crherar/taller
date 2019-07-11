@@ -93,18 +93,18 @@
                                              <div class=row>
 
                                                 <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
-                                                        <div class="card-box noradius noborder bg-default" style="min-height: 160px; min-height: 226px;">
+                                                        <div class="card-box noradius noborder bg-default" style="min-height: 160px; min-height: 226px; min-width: 300px;">
                                                                 <!-- <i class="fa fa-bug float-right text-white"></i> -->
-                                                                <h6 class="text-white text-uppercase m-b-20">Tipo de Malware más frecuente</h6>
+                                                                <h6 class="text-white text-uppercase m-b-20">Tipo de regla/malware más detectado en la red</h6>
                                                                 <h1 id="malwareMasFrecuente" class="m-b-20 text-white"></h1>
                                                                 <span id="spanMalwareMasFrecuente" class="text-white"></span>
                                                         </div>
                                                 </div>
             
-                                                <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3">
+                                                <div class="col-xs-12 col-md-6 col-lg-6 col-xl-3" style="margin-left: 80px;">
                                                         <div class="card-box noradius noborder bg-default" style="min-height: 160px; min-height: 226px;"> <!-- min-width: 250px;-->
                                                                 <!-- <i class="fa fa-exclamation-triangle float-right text-white"></i> -->
-                                                                <h6 class="text-white text-uppercase m-b-20">Nº Variantes de malware</h6>
+                                                                <h6 class="text-white text-uppercase m-b-20">Nº Tipos de regla/malware detectados</h6>
                                                                 <h1 id="cantTipoMalware" class="m-b-20 text-white"></h1>
                                                                 <span id="spanTipoMalware" class="text-white"></span>
                                                         </div>
@@ -121,7 +121,7 @@
                             <!-- end row -->
                             <div class="card mb-3">
                                     <div class="card-header">
-                                        <h3>Distribución histórica de tipos de malware en la red</h3>
+                                        <h3>Distribución histórica de tipos de reglas en la red</h3>
                                     </div>                  
                                     <div class="card-body">
 
@@ -134,7 +134,7 @@
                                         <h3>Número de computadores infectados por mes</h3>
                                     </div>                  
                                     <div class="card-body">
-                            <div class="wrapper" id="opciones" style="border: 1px solid black; margin-bottom: 10px;  border-radius: 0;">
+                            <div class="wrapper" id="opciones" style="border: 1px solid black; border-top: 1px solid black; margin-bottom: 10px;  border-radius: 0.35rem;">
                             <select id="mySelect" class="form-control"></select>
                                     <!-- <option value="">One</option>
                                     <option value="">Two</option>
@@ -149,7 +149,7 @@
                             </select>
                             </div>  
                         
-                            <div id="container2" style="min-width: 600px; max-width: 100%; height: 400px; margin: 0 auto; border: 1px solid black;"></div>
+                            <div id="container2" style="min-width: 600px; max-width: 100%; height: 400px; margin: 0 auto; border: 1px solid black; border-top: 1px solid black"></div>
                         </div>
                     </div>
                 </div>
@@ -232,7 +232,7 @@
                     $("#cantClientesInfectados").html(data.cantClientesInfectados);
 
                     $("#malwareMasFrecuente").html(data.malwareMasFrecuente[0].clasificacion);
-                    $("#spanMalwareMasFrecuente").html('El malware más frecuente de la red es "' + data.malwareMasFrecuente[0].clasificacion + '" con un total de ' + data.malwareMasFrecuente[0].maximo + ' apariciones históricas.');//de un total de ' + + 'conectados')
+                    $("#spanMalwareMasFrecuente").html('El tipo de malware más detectado en la red es "' + data.malwareMasFrecuente[0].clasificacion + '" con un total de ' + data.malwareMasFrecuente[0].maximo + ' apariciones históricas (' + data.malwareMasFrecuente[0].maximo + ' archivos infectados de forma histórica).');
 
 
                     $("#spanCantClientesInfectados").html('Se han encontrado ' + data.cantClientesInfectados + ' computadores infectados en la red.');//de un total de ' + + 'conectados')
@@ -240,12 +240,12 @@
                     $("#cantTipoMalware").html(data.cantTipoMalware);
 
 
-                    $("#spanTipoMalware").html('Se ha(n) encontrado ' + data.cantTipoMalware + ' variante(s) de malware en la red de forma histórica.');
+                    $("#spanTipoMalware").html('Se ha(n) encontrado ' + data.cantTipoMalware + ' tipo(s) de malware en la red de forma histórica.');
 
                     //Se han encontrado 58 archivos maliciosos en total en toda la red
 
                     var rows2 = data.variantesMalware;
-                    var str2 = '<option value="">Seleccione tipo de malware para generar gráfico</option>';
+                    var str2 = '<option value="">Seleccione tipo de regla para generar gráfico</option>';
                     for (i=0 ; i < rows2.length ; i++){
                         var row2= rows2[i];
                         console.log('row2=' + row2)
@@ -268,7 +268,7 @@
                             type: 'pie'
                         },
                         title: {
-                            text: 'Distribución historica de tipos de malware en la red'
+                            text: 'Distribución histórica de tipos de reglas en la red'
                         },
                         // subtitle: {
                         //     text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
@@ -289,7 +289,7 @@
 
                         series: [
                             {
-                                name: "Tipo de malware",
+                                name: "Tipo de regla",
                                 colorByPoint: true,
                                 data: porcentajeDeMalware
                                 

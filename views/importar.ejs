@@ -89,8 +89,9 @@
 								
 							<div class="card-body">
                                 <!-- name="files[]" -->
-                                <form id="formSubirRegla" name="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-                                    <input type="file" name="archivo" id="attachment">
+                                <form id="formSubirRegla" name="upload-form" action="/upload" method="post">
+									<input type="file" name="archivo" id="archivo">
+									<!-- <input class="" type="submit" name="botonsubir" value="Subir"/> -->
                                     <button type="submit">Subir</button>
                                 </form>								
 							</div>														
@@ -133,52 +134,55 @@
 <script>
 
 
-$('#button1').on('click', function() {
-    $.ajax({
-      type: 'POST',
-      url: '/send',
-      //data: JSON.stringify({ saludo: 'hola hola hola' }),
-      data: {direccionIP:'192.168.100.2', saludo:'Exploit-Kits_index.yar'},
-      success: function(resultData) {
-         alert(resultData);
-      }
-    });
-});
+// $('#button1').on('click', function() {
+//     $.ajax({
+//       type: 'POST',
+//       url: '/send',
+//       //data: JSON.stringify({ saludo: 'hola hola hola' }),
+//       data: {direccionIP:'192.168.100.2', saludo:'Exploit-Kits_index.yar'},
+//       success: function(resultData) {
+//          alert(resultData);
+//       }
+//     });
+// });
 
-	// $(document).on('submit', '#formSubirRegla', function(){
+	$(document).on('submit', '#formSubirRegla', function(e){
 
-	// 	var form = $(this);
+		var form = $(this);
+		var type = form.attr('method');
+		var url = form.attr('action');
 
-	// 	var type = form.attr('method');
-	// 	var url = form.attr('action');
-	// 	//var data = form.serialize();
+		var file = document.getElementById("archivo");
+		console.log(file);
+		var formData = new FormData(this);    
+		formData.append("archivo", file);
 
-	// 	var formData = new FormData(this);    
+		// console.log(formData);
 
-	// 	alert(formData);
-	// 	console.log(formData);
+		$.ajax({
+			type: form.attr('method'),
+			url: form.attr('action'),
+			data: formData,
+			contentType: false,
+			processData: false,
+			success: function(data){
+				console.log(data);
+				alert(data);
+				// if (typeof(data) == 'Object')
+				// {
+				//     alert('Orden recibida por: ' + data.escaneadoConExito + 'equipos \n' + '\nNo se pudo establecer conexión con los siguientes equipos:\n' + data.escaneadoConError)
 
-	// 	$.ajax({
-	// 		type: form.attr('method'),
-	// 		url: form.attr('action'),
-	// 		data: formData,
-	// 		success: function(data){
-	// 			alert(data);
-	// 			// if (typeof(data) == 'Object')
-	// 			// {
-	// 			//     alert('Orden recibida por: ' + data.escaneadoConExito + 'equipos \n' + '\nNo se pudo establecer conexión con los siguientes equipos:\n' + data.escaneadoConError)
-
-	// 			// } else {
-	// 			//     alert(data);
-	// 			// }        
-	// 			// console.log(data);
-	// 			//res.send({escaneadoConExito, escaneadoConError});
-	// 			//alert('Orden recibida por: ' + data.escaneadosConExito + 'equipos \n' + '\nNo se pudo establecer conexión con los siguientes equipos:\n' + data.escaneadosConError)
-	// 			//alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
-	// 		}   
-	// 	});
-	// 		return false;
-	// });
+				// } else {
+				//     alert(data);
+				// }        
+				// console.log(data);
+				//res.send({escaneadoConExito, escaneadoConError});
+				//alert('Orden recibida por: ' + data.escaneadosConExito + 'equipos \n' + '\nNo se pudo establecer conexión con los siguientes equipos:\n' + data.escaneadosConError)
+				//alert('Archivos eliminados con éxito:\n\n' + data.data.eliminadosExito + '\n\nLos siguientes archivos no han podido ser eliminados:\n\n' + data.noEliminados);
+			}   
+		});
+		return false;
+	});
 
 </script>
 <!-- END Java Script for this page -->

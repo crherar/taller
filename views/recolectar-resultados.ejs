@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
@@ -30,6 +31,17 @@
             tr.shown td.details-control {
             background: url('assets/plugins/datatables/img/details_close.png') no-repeat center center;
             }
+            
+         .table td, .table th {
+            padding: .25rem !important;
+            padding-top: 0.75rem;
+            padding-right: 0.75rem;
+            padding-bottom: 0.75rem;
+            padding-left: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
 		</style>		
 		<!-- END CSS for this page -->
 				
@@ -95,13 +107,13 @@
                                                                <td class="tdvalue"><%= results[i].direccionIP %></td>
                                                                <td class="tdvalue"><%= results[i].clasificacion %></td>
                                                                <td class="tdvalue"><%= results[i].nombre %></td>
-                                                               <td style='text-align: center;'><input class='tdruta' type='checkbox' value='<%= results[i].nombre %>' style='transform: scale(2);'></td>
+                                                               <td style='text-align: center;'><input class='tdruta' type='checkbox' value='<%= results[i].nombre %>' style="transform: scale(1.2)"></td>
 															 </tr>    
 															<% } %>
 														 
                                             </table>
                                             <button class="btn btn-googleplus">Eliminar archivos seleccionados</button>
-                                            <input type="checkbox" id="select_all" style="transform: scale(2); margin-left: 20px; margin-right: 5px"> SELECCIONAR TODOS</input>
+                                            <input type="checkbox" id="select_all" style="transform:scale(1.2); margin-left: 20px; margin-right: 5px"> SELECCIONAR TODOS</input>
 									</div>
 									
 								</div>														
@@ -222,7 +234,7 @@
                     var str = '';
                     for (i=0 ; i < rows.length ; i++){
                         var row = rows[i];
-                            str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(2);'></td></tr>";
+                            str +=  "<tr><td>" + row.clasificacion+ "</td>" + "<td>" + row.nombre+ "</td>" + "<td style='text-align: center;'><input class='tdruta' type='checkbox' value='" + row.nombre + "' style='transform: scale(1);'></td></tr>";
                 };
 
                 $('#dirIP').html(direccionIP);

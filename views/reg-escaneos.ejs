@@ -151,13 +151,13 @@
                                               <td><%= escaneosErroneos[i].ruta%></td>
                                               <td><%= escaneosErroneos[i].codigo%></td>
                                               <!-- <td><button class='btnReintento'>Reintentar</button></td> -->
-                                              <td style='text-align: center;'><input type='checkbox' style='transform: scale(2);'></td>
+                                              <td style='text-align: center;'><input type='checkbox' style='width:20px; height:20px;'></td>
                                             </tr>    
                                         <% }}%>
                                   </tbody>
                                 </table>
                                 <button class="btn btn-googleplus">Reintentar scan para computadores seleccionados </button>
-                                <input type="checkbox" id="select_all" style="transform: scale(2); margin-left: 20px; margin-right: 5px"> SELECCIONAR TODOS</input>
+                                <input type="checkbox" id="select_all" style="margin-left: 20px; margin-right: 5px"> SELECCIONAR TODOS</input>
 
                             </div>							
                         </div><!-- end card-->	
@@ -231,7 +231,7 @@
 
     $(document).on('submit', '#formReintentoScan', function(){
 
-        var datos = [];
+        var datos = {};
 
         $("input:checked").each(function() {
                 var filaActual = $(this).closest("tr");
@@ -239,14 +239,17 @@
                 var cliente = filaActual.find("td:eq(1)").text();
                 var regla = filaActual.find("td:eq(5)").text();
                 var ruta = filaActual.find("td:eq(6)").text();
-                fila.push(cliente, regla, ruta);
-                datos.push(fila);
+                //fila.push(cliente, regla, ruta);
+                datos[cliente] = {regla, ruta}
+                //datos.push(fila);
         });
+
+        console.log(datos);
 
         $.ajax({
                 type: "POST",
                 url: "/reescanear",
-                data: {datos},
+                data: datos,
                 success: function(data){
                     alert(data);
                     //console.log(data.reescanConExito + data.reescanConError);
